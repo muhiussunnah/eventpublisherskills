@@ -41,6 +41,24 @@ Every event needs an image. Never publish without one.
 
 ## Image Generation via ChatGPT
 
+### IMPORTANT — ChatGPT is the ONLY allowed image source for replacements
+
+When the source image is unusable (text-heavy, poor quality, no people, duplicate, missing),
+the replacement image MUST be generated via the logged-in ChatGPT tab in the user's browser.
+
+**FORBIDDEN sources (NEVER use):**
+- ❌ Unsplash (images.unsplash.com)
+- ❌ Pexels, Pixabay, or any "free stock photo" site
+- ❌ Any "opensource" / royalty-free image database
+- ❌ Wikimedia, Flickr, or any web-image proxy (wsrv.nl is only for re-hosting ChatGPT output)
+
+**Reasoning:** Stock photos are generic, often non-Nordic, often staged, often used elsewhere
+on the web — they break the authentic UGC brand feel that Famies depends on. ChatGPT image
+generation produces unique, on-brand, Nordic family imagery that no other event has.
+
+If the ChatGPT tab is not open or login expired, ASK the user to open it / log in.
+Do NOT fall back to stock photos under any circumstance.
+
 ### Prompt Format
 \`\`\`
 authentic vertical 1:1 photo of Nordic children/families [engaging with the event activity in a way that feels warm, relatable, and relevant to parents browsing a family events app]

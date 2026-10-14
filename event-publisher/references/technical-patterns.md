@@ -3,7 +3,7 @@
 ## Browser Tab Setup
 
 You need 3 tabs open:
-1. **Famies Dashboard** — https://dashboard.famies.app/events
+1. **Famies Dashboard** — https://dashboard.fammap.app/events
 2. **Source Website** — The event calendar being scraped
 3. **ChatGPT** — https://chatgpt.com (for image generation)
 
@@ -12,7 +12,7 @@ Use `tabs_context_mcp` to get tab IDs at the start. Reference tabs by their IDs 
 ## Dashboard Navigation
 
 ### Getting to the Events Page
-- Navigate to https://dashboard.famies.app/events
+- Navigate to https://dashboard.fammap.app/events
 - If redirected to /dashboard, click "Events" in the left sidebar under "OPERATIONAL CONTENT"
 - Direct URL navigation to /events/edit often redirects — use the sidebar
 
@@ -182,9 +182,9 @@ For large batches (10+ events) the UI route is too slow. Drive the Famies admin 
 
 | Purpose | Method | URL |
 | --- | --- | --- |
-| Fetch full event body | GET | `https://api.famies.app/admin/events/{id}` |
-| Upload image | POST | `https://api.famies.app/admin/image` (multipart `file`) |
-| Update event | PATCH | `https://api.famies.app/admin/events/{id}` |
+| Fetch full event body | GET | `https://api.fammap.app/admin/events/{id}` |
+| Upload image | POST | `https://api.fammap.app/admin/image` (multipart `file`) |
+| Update event | PATCH | `https://api.fammap.app/admin/events/{id}` |
 
 All three need headers:
 ```
@@ -259,7 +259,7 @@ window.__sendPrompt = async function(text) {
 };
 
 window.__getEvent = async function(eventId) {
-  const r = await fetch('https://api.famies.app/admin/events/' + eventId, {
+  const r = await fetch('https://api.fammap.app/admin/events/' + eventId, {
     headers: {'Authorization': 'Bearer ' + window.__FAMIES_TOKEN, 'Platform': 'web', 'Version': '0.0.0'}
   });
   return (await r.json()).data;
@@ -270,7 +270,7 @@ window.__uploadAndPatch = async function(eventId) {
   const blob = await (await fetch(imgUrl)).blob();
   const file = new File([blob], 'event.jpg-' + Date.now(), {type: 'image/jpeg'});
   const fd = new FormData(); fd.append('file', file);
-  const up = await fetch('https://api.famies.app/admin/image', {
+  const up = await fetch('https://api.fammap.app/admin/image', {
     method: 'POST',
     headers: {'Authorization': 'Bearer ' + window.__FAMIES_TOKEN, 'Platform': 'web', 'Version': '0.0.0'},
     body: fd
@@ -286,7 +286,7 @@ window.__uploadAndPatch = async function(eventId) {
     childMinAge: ev.childMinAge, childMaxAge: ev.childMaxAge,
     ctaLink: ev.ctaLink, ctaText: ev.ctaText, dates: ev.dates
   };
-  const p = await fetch('https://api.famies.app/admin/events/' + eventId, {
+  const p = await fetch('https://api.fammap.app/admin/events/' + eventId, {
     method: 'PATCH',
     headers: {'Authorization': 'Bearer ' + window.__FAMIES_TOKEN, 'Platform': 'web', 'Version': '0.0.0', 'Content-Type': 'application/json'},
     body: JSON.stringify(body)
@@ -333,3 +333,86 @@ Recovery: sleep ~4 minutes (split into 5-6 × 42s tool calls), then re-send the 
 3. `window.__results = []` initialized
 4. `window.__baselineImgCount()` returns a sensible number
 5. Pick one event and run all 3 calls end-to-end before starting the full loop
+
+## Partner & Ongoing-Venue Events — Push-Safe API CREATE + Feed Visibility (learned 2026-09)
+
+Beyond dated municipality-calendar events, Famies now has **ongoing PARTNER venues** (restaurants, bars, buffés — paid clients like O'Learys Kista, La Botanica, Trattoria Grazie, Moldau) shown as **recurring events**. The org + venue are usually already published; the job is to add ONE recurring event per venue. This is a different shape from the scrape-a-calendar flow above, and it uses **POST to CREATE** (the sections above only PATCH existing events).
+
+### 🚫 Push control — the #1 rule (see also memory `push-notifications-always-off`)
+- `POST https://api.fammap.app/admin/events` (same 3 headers + `Content-Type: application/json`) **fires a push notification by default**.
+- **ALWAYS include `shouldNotifyUsers: false`** in the body → creates the event live with **NO push**. It is a valid optional field (confirmed in the dashboard's own Zod schema: `shouldNotifyUsers:vc().optional()`).
+- **NEVER omit `shouldNotifyUsers`** — absence defaults it to `true` and a push goes out (this wrongly pushed La Botanica on 2026-09-22; the CEO complained). The user's standing rule: push OFF for every action, forever.
+- **PATCH never carries a notify field, so PATCH never pushes** — use PATCH freely to fix an existing event (age, recurrence, description, image, etc.) with zero push risk.
+
+### POST /admin/events — valid create schema
+Required: `placeId`, `title`, `description`, `isFree`, `isRecurring`.
+Optional: `images[]` (S3 urls), `lat`, `lng`, `address`, `shouldNotifyUsers`, `parentMinAge/parentMaxAge`, `childMinAge/childMaxAge`, `interestIds:[n]` (also accepts `interest:[{interestId,name}]`), `ctaLink` (must be a URL), `ctaText`, `recurrence`, `dates:[{startDate,endDate,eventDateId?}]`.
+- **OMIT `isPublished`** — it is NOT an event field (belongs to `/admin/campaigns` only); including it → `400 "/body must NOT have additional properties" (code 1006)`. Events go live automatically on create; there is no publish flag on events.
+- The 200 response does **not** return the new id in a predictable place — find the created event by scanning `/admin/events?limit=100&page=N` for its title.
+
+### Ongoing-venue recurring template (copy O'Learys / La Botanica exactly)
+```json
+{ "isRecurring": true,
+  "recurrence": { "days":[0,1,2,3,4,5,6], "startTime":"11:00:00", "durationMinutes":720,
+                  "startDate":"<A DATE IN THE PAST>", "endDate":"2027-12-31" } }
+```
+- `startDate` **must be in the past** (O'Learys uses `2026-08-17`). A today/future start, or a one-time dated event with a past start, does NOT render as an ongoing "Idag" venue. Omit `dates` when recurring.
+- All-ages family venue → `childMinAge:0, childMaxAge:18` (see `RULE-LEARNING-all-ages-cMax18`); `parentMinAge:18, parentMaxAge:18`.
+  ⚠ 2026-10-14: the dashboard form default and memory rule P are `parentMaxAge:100`. Use 18/100 unless the user says otherwise (see "Permanent Places Publishing" below).
+- Seasonal places: a future `startDate` is fine when it is the real next season (e.g. ski resort 2026-12-18 → 2027-04-04); the event appears when the season starts.
+- `ctaText:"Läs mer"`, `ctaLink:` the venue's own website.
+
+### Why an event shows or hides in the app (feed-visibility rules)
+1. **Per-CITY filter is the biggest.** The app Explore list is scoped to the city dropdown (region + kommun). An event appears only when the selected kommun == its `place.municipality`. (Moldau = Stockholm kommun was invisible while the tester's app was set to "Stockholm − Solna"; switching to "Stockholm − Stockholm" showed it instantly.) Always test under the venue's OWN kommun.
+2. **Ongoing venue must be recurring + past-start** (template above). One-time / today-start hides.
+3. **`childMinAge`/`childMaxAge` = which age chip it appears under**, not whether it shows: `0-18` → every chip incl 0-2/3-5; `12-18` → only All / 9-12 / 13+. Under a young chip a 12+ event is correctly hidden. Client "från 12 år" ⇒ 12-18, but warn it then won't appear in younger filters.
+4. **Interests do NOT gate visibility** (Bamse shows with zero interests). Set them for relevance only.
+5. **PARTNER badge** = the place's organization has `isPartnered:true` (set on the org). Event structure is otherwise identical to non-partner events.
+
+### Image gotcha (2026-09) — reuse the place image
+- `POST /admin/image` now returns `400 {message:"Folder name is not allowed for dashboard upload"}` for the old programmatic-upload flow, so you often **cannot upload a fresh image via the API**.
+- For partner venue events, **reuse the venue's existing S3 image**: GET the place, take `images[0]` (already a `fammap-storage.s3…` URL that always renders), and put it in the new event's `images:[…]`. Authentic and reliable.
+- If a genuinely new image is needed and the API upload is blocked, have the user upload it via the dashboard UI (editing a live event to add an image is an edit → no push).
+
+### Finding venues/events fast — `searchText`
+The admin LIST endpoints and the dashboard's Venues/Events search box support `?searchText=<name>` (dashboard box is debounced ~1s). Use it to grab a venue's `placeId` instead of paging thousands of rows. Venue Detail page route is `/places/{placeId}` (⋮ → Detail); it shows address, org/partner, website, hours, category.
+
+## Permanent Places Publishing — Organizer → Venue → Recurring Event via API (learned 2026-10-13, Gävleborg run)
+
+All calls: `https://api.fammap.app` with headers `Authorization: Bearer <localStorage.auth_token>`, `Platform: web`, `Version: 0.0.0` (+ `Content-Type: application/json` for JSON bodies). Schemas below were read from the dashboard bundle (`/assets/index-*.js`, Zod schemas) and confirmed by 52 successful creates.
+
+### Image upload — FIX for "Folder name is not allowed"
+`POST /admin/image` (multipart field `file`) decides the S3 folder from the **file name prefix**. These all return 200 (tested 2026-10-13):
+- `event.jpg-<Date.now()>` → `event/<orgId>/<uuid>.webp`
+- `place.jpg-<Date.now()>` → `place/…`
+- `organization.jpg` → `organization/…` (avatars)
+- `campaign.jpg-<Date.now()>` → `campaign/…`
+Response: `data.image` (S3 URL, converted to webp). Delete an unused upload with `DELETE /admin/image` body `{image: url}`.
+Fetch source images through `https://wsrv.nl/?url=<enc>&w=1080&h=1080&fit=cover&output=jpg&q=88` (add `&a=right|left|bottom|attention` to steer the crop; use w/h 600–750 for small sources to avoid upscaling). Logos: `&w=512&h=512&fit=contain&cbg=white&bg=white&output=jpg` (`bg=white` is needed or transparent PNGs turn black; white logos need a dark `bg`, e.g. `1d3557`).
+Upload separately for place and event (do not share one S3 URL — deleting an image in one form would break the other).
+
+### POST /admin/organizations
+`{name, avatar (url|null), isPartnered:false, isGovernment, email|null, phoneNumber|null, website|null, instagram|null, facebook|null, youtube|null}`
+- **`email` is UNIQUE** across organizations → `400 {message:"Query error, code 23505"}` on conflict. E.g. `registrator@statensmuseermtf.se` is already used by org "Sjöhistoriska"; state museums each have their OWN org (Vasamuseet, Sjöhistoriska, Flygvapenmuseum, Järnvägsmuseet) with the museum's own contacts.
+- Reuse before create: `GET /admin/organizations?page=1&limit=100&searchText=<name>` + exact (normalised) name match.
+- Kommun-run places → organizer "X kommun", `isGovernment:true`, switchboard phone, kommun main email, official socials.
+- PATCH `/admin/organizations/{id}` with the full body to update (used to fix avatar/youtube).
+
+### POST /admin/places (venue)
+`{organizationId, interestId, municipalityId, images:[s3], openingHours:[{open:{day,time:"HH:MM"},close:{day,time}}]|null, lat, lng, address, website|null, email (omit if none), phoneNumber|null, title, description, ctaLink, ctaText:"Läs mer", instagram|null, facebook|null, youtube|null, isPublished:true}`
+- day numbering 0 = Sunday … 6 = Saturday. Several rows per day are allowed. No cross-midnight rows (use 23:59).
+- `municipalityId` from `GET /admin/municipalities?page=N&limit=100` (limit max 100; 290 kommuner).
+- `GET /admin/places` does NOT accept `municipalityId` as a query param (400) — page through all or use `searchText`.
+
+### POST /admin/events (recurring permanent place)
+`{placeId, title, description, images:[s3], lat, lng, address, isFree, shouldNotifyUsers:false, isRecurring:true, recurrence:{days, startTime:"HH:MM:SS", durationMinutes, startDate, endDate}, parentMinAge:18, parentMaxAge:100, childMinAge, childMaxAge:18, interestIds:[a,b], ctaLink, ctaText:"Läs mer"}`
+- `parentMaxAge` = **100** (dashboard default and memory rule P). The 2026-10-01 Jönköping batch used 18 — do not copy that.
+- Always-open: `days [0..6], startTime "00:00:00", durationMinutes 1439`, venue `openingHours:null`.
+- Interests (`GET /admin/interests`): 9 Bebis & Du, 7 Familjeliv & Pepp, 1 Fira & Njuta, 11 Lär & Utforska, 8 Lek & Fart, 2 Mat & Mums, 4 Mys & Hitta på, 6 Ses & Hitta på, 5 Tillgängligt för alla, 10 Utflykter & Kul, 3 Ut & Upptäck. Conventions: museums [10,11], swim/action/ski [8,10], nature/parks/viewpoints [3,10].
+
+### Browser-tool gotchas (Claude in Chrome javascript_tool)
+- Return values longer than ~1000 chars are truncated, and outputs that look like query strings/cookies are blocked → return compact strings, replace `?&=` before returning, page through long lists in slices.
+- The dashboard tab can `fetch` api.fammap.app and wsrv.nl; keep helpers on `window` (`__publishPlace`, `__verify`) and pass each place as one JSON spec (ASCII-escaped `\uXXXX` so Swedish letters survive copy/paste).
+- On Windows, Python run with `-I` ignores `PYTHONIOENCODING`; use `python -I -X utf8` for UTF-8 output. Loops over files written by Python need `tr -d '\r'`.
+- Some kommun sites (gavle.se) time out from this network; WebFetch/curl fail too — use Wayback (`web.archive.org/web/2026…`) or the visit-site and flag it.
+- The local git repo needs `git -c safe.directory=*` (folder owned by another Windows SID).

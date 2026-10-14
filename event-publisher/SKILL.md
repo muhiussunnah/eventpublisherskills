@@ -1,17 +1,20 @@
 ---
 name: event-publisher
-skill_version: "1.30.0"
-last_updated: "2026-04-16"
-rule_count: 46
+skill_version: "1.37.0"
+last_updated: "2026-10-14"
+rule_count: 24
 rules_file: references/event-rules.md
+learning_log: LEARNING-LOG.md
+github_repo: https://github.com/muhiussunnah/eventpublisherskills
 description: >
-  Automated event scraping and publishing to the Famies dashboard (dashboard.famies.app).
+  Automated event scraping and publishing to the Famies dashboard (dashboard.fammap.app).
   Use this skill whenever the user wants to scrape events from any Swedish municipality or event calendar website
   and publish them to the Famies dashboard. Triggers include: publishing events, scraping events, adding events
   to Famies, importing events from a website, event calendar automation, "publish events from [website]",
   "scrape [website] events", or any mention of the Famies dashboard combined with events. Also use when the user
   wants to update images, fix duplicates, bulk-add images to existing events, or manage events on the Famies dashboard
-  (including via the admin API for large batches — see Rule #10).
+  (including via the admin API for large batches — see Rule #10). Also use when the user wants permanent family
+  places (museums, swim halls, parks, farms, ski resorts) published as organizer → venue → recurring event.
 ---
 
 # !! SESSION-START INTEGRITY CHECK (Rule #15) !!
@@ -21,11 +24,13 @@ description: >
 # 3. If mismatch, STOP. Tell the user: "Skill integrity check failed: expected N rules, found M. Don't proceed until we fix."
 # 4. Only after integrity is confirmed, begin batch work.
 # This prevents silent skill-file corruption from causing a session to run with stale or partial rules.
+# NOTE (2026-10-14): event-rules.md has 24 `## Rule #` headers. Rule numbers are sparse
+# (1–11, 10.5–10.7, 28, 51, 52, 59, 61–65), so the old "52" was the highest number, not the header count.
 
 # Famies Event Publisher
 
 Automate the process of scraping events from source websites (Swedish municipality calendars, event pages, etc.)
-and publishing them to the Famies dashboard at https://dashboard.famies.app/events.
+and publishing them to the Famies dashboard at https://dashboard.fammap.app/events.
 
 Famies is a family app targeting parents with children aged 0–12 in Sweden. Every decision — which events to
 publish, what images to use, how to describe things — should be made through the lens of "would a Swedish parent
@@ -37,7 +42,7 @@ To use this skill, you need exactly 3 things ready in your Chrome browser:
 
 1. **Event Source URL** — The user provides the URL of the event calendar to scrape (e.g., `https://www.vallentuna.se/evenemang-och-upplevelser/evenemangskalender/`). Open this in a Chrome tab.
 
-2. **Famies Dashboard (logged in)** — https://dashboard.famies.app must be open in Chrome and you must be **already logged in**. Navigate to the Events section.
+2. **Famies Dashboard (logged in)** — https://dashboard.fammap.app must be open in Chrome and you must be **already logged in**. Navigate to the Events section.
 
 3. **ChatGPT (logged in)** — https://chatgpt.com must be open in Chrome and you must be **already logged in**. This is used for generating family-targeted images when needed.
 
@@ -45,7 +50,7 @@ All 3 must be open in separate browser tabs before starting. Use `tabs_context_m
 
 If any of these are not ready, ask the user to:
 - Provide the event source URL
-- Log in to dashboard.famies.app
+- Log in to dashboard.fammap.app
 - Log in to chatgpt.com
 
 ## Core Workflow
@@ -140,17 +145,47 @@ Click "+ Add Event" on the dashboard and fill in:
 7. **Pricing** — Set as free or enter the price
 8. **CTA Text** — Set to "Läs mer"
 9. **CTA Link** — Set to the source event URL
-10. **Push Notification** — Turn OFF (default is ON, must be manually toggled off)
+10. **Push Notification** — Turn OFF (default is ON, must be manually toggled off). **API route:** pass `shouldNotifyUsers: false` in the POST body and NEVER omit it — absence defaults push ON (this wrongly pushed a partner event on 2026-09-22). See `references/technical-patterns.md` → "Partner & Ongoing-Venue Events".
 
 ### Step 7: Publish
 
 Click "Create Event" (or "Update Event" if editing). Verify the page redirects back to the events list, confirming success.
+
+## Permanent Places → Events (Organizer → Venue → Recurring Event) — NEW 2026-10
+
+Used when the user gives a list of **permanent family places** (e.g. the "Vad ska vi hitta på idag?" HTML with
+embedded `places`, filtered by `region`) instead of a dated event calendar. Full API details:
+`references/technical-patterns.md` → "Permanent Places Publishing". First run: Gävleborg 2026-10-13
+(`GAVLEBORG-PERMANENT-PLACES-FINAL-REPORT-2026-10-13.md`, 52 published).
+
+1. **Duplicate check first** — against ALL existing places, events and organizers (name tokens + places within
+   ~1 km of the coordinates). Also catch duplicates inside the input list itself. Already-published → skip.
+2. **Research each place** (parallel research subagents are fine): status (open/closed), real operator,
+   legal/official organizer name, phone, generic email, website, Instagram/Facebook/YouTube, logo, exact address,
+   OSM/official coordinates, opening hours + season, 2–3 real images from the official site / visit-site.
+   The input list is a hint only — its coordinates, domains and names are often outdated.
+3. **Organizer** — reuse if it exists (exact name match); otherwise create with as much verified info as
+   possible + logo avatar. Kommun-run places → "X kommun" (isGovernment: true).
+4. **Venue** — create with full address, coordinates, municipalityId (never null), per-day openingHours,
+   interestId, website/phone/email/socials of the place.
+5. **Event** — recurring: title "Platsnamn – kort beskrivning", Swedish description 300–650 chars from
+   official facts only, `shouldNotifyUsers: false`, parent 18–100, child 0–18 (real minimum if the place sets one),
+   2 interests, ctaText "Läs mer" + official ctaLink.
+6. **Recurrence rule** — pick ONE time window that is genuinely open on every listed day (e.g. weekends close
+   earlier → use the shorter window). Always-open outdoor places: 00:00 + 1439 min. Season over and next season
+   not announced → copy the previous season's calendar span into next year and flag it in the report.
+7. **Skip** when: closed to the public, no fixed hours AND no real visit option, no official source, or no real
+   image of the place. Report every skip with the reason.
+8. **Privacy** — only generic/business contacts. Never personal-name emails or private individuals' phones.
+9. **Audit after publishing** — re-fetch all events of the region: no duplicate titles/images, municipality set,
+   ages, recurrence, CTA, interests; visual contact-sheet check of every event image and avatar.
 
 ## Technical Patterns
 
 Read `references/technical-patterns.md` for the detailed browser automation code patterns including:
 - Image transfer between tabs (ChatGPT → tmpfiles.org → wsrv.nl proxy → dashboard) — for UI flow
 - **Bulk publishing via Famies admin API** (GET / POST /admin/image / PATCH /admin/events) — for 10+ event batches, see Rule #10
+- **Partner & ongoing-venue events (recurring restaurants/venues) via POST /admin/events** — push-safe CREATE (`shouldNotifyUsers:false`, omit `isPublished`), the recurring+past-start template, feed-visibility rules (per-city / age-chip / interests-don't-gate), and the `/admin/image` "Folder name not allowed" gotcha (reuse the place's S3 image). NEW 2026-09.
 - **JWT extraction & cross-tab transfer** via char-code encoding (bypasses output content filter)
 - **Three-call pattern per event** (send → wait 42s → finish) to stay inside the CDP 45s timeout
 - ChatGPT rate-limit detection and 4-minute recovery pattern

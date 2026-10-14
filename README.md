@@ -26,12 +26,30 @@ No coding required. Just talk to Claude.
 ```
 eventpublisherskills/
   event-publisher/
-    SKILL.md                          # Main skill instructions
+    CLAUDE.md                         # Session bootstrap: what to read first + end-of-session protocol
+    SKILL.md                          # Main skill instructions (calendar events + permanent places)
+    LEARNING-LOG.md                   # Dated training log — every new lesson is added here
+    agent-memory-v4.9.md              # Operational memory (rules, code patterns, city status)
+    *-FINAL-REPORT-*.md               # Reports from each run
     references/
       image-rules.md                  # Image selection decision tree
-      technical-patterns.md           # Browser automation code patterns
+      technical-patterns.md           # Browser/API patterns (incl. Permanent Places Publishing)
       event-rules.md                  # Event filtering and exception rules
+    _archive-historical-reports/      # Older per-city reports
+  eventscounter/                      # Companion skill: count live events per city
 ```
+
+## Quick setup on a new computer
+
+```bash
+git clone https://github.com/muhiussunnah/eventpublisherskills.git
+mkdir -p my-project/.claude/skills
+cp -r eventpublisherskills/event-publisher my-project/.claude/skills/
+cd my-project && claude
+```
+
+Then ask Claude to read `event-publisher/CLAUDE.md` first. After each session Claude adds what it learned to
+`LEARNING-LOG.md` and the skill files, and pushes the changes back to this repo — `git pull` to get the latest.
 
 ---
 
@@ -46,7 +64,7 @@ If you use [Claude Code](https://docs.anthropic.com/en/docs/claude-code) from yo
 Open your terminal and run:
 
 ```bash
-git clone https://github.com/chaosandlovefam-crypto/eventpublisherskills.git
+git clone https://github.com/muhiussunnah/eventpublisherskills.git
 ```
 
 This downloads the skill files to your computer.
