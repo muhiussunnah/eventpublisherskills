@@ -37,6 +37,9 @@ Whatever the user teaches becomes part of the skill:
 2. Update the file the learning belongs in (`SKILL.md`, `references/technical-patterns.md`, `references/event-rules.md`, `references/image-rules.md`) and bump `skill_version` / `last_updated` in SKILL.md.
 3. Save the task's final report next to the others (`<REGION/CITY>-…-FINAL-REPORT-<date>.md`).
 4. Secret-scan, commit (`git -c safe.directory=* …`), and push to the GitHub repo above.
+   Push command that is allowed (run it from inside `F:\eventpublisherskills\eventpublisherskills`, exactly like this):
+   `git -c safe.directory=* push https://github.com/muhiussunnah/eventpublisherskills.git main`
+   (allow rule lives in `F:\eventpublisherskills\.claude\settings.local.json`; other forms are blocked by the auto-mode classifier).
    Commit as `muhiussunnah <276623937+muhiussunnah@users.noreply.github.com>` (author AND committer) and add
    **no** AI attribution / Co-Authored-By lines — the user wants commits to look like they came straight from muhiussunnah.
 
