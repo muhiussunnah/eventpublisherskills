@@ -426,7 +426,15 @@ No Google Sheets connector is available, so edit through the user's logged-in Ch
 3. Formulas: type once in the first row, then Name Box `D2:D87\n` + `ctrl+d` to fill down.
 4. An emoji as the first character of a cell is dropped → F2, Home, type emoji, Enter.
 5. Verify by jumping to cells and zooming on the formula bar (region ≈ 0,100 → 900,126).
-Never use synthetic paste events (crash Sheets), `navigator.clipboard.writeText` (hangs), or the OS clipboard (races with the user's own copy/paste). The user may be editing the same sheet live — stop touching formatting when you see changes you did not make.
+Never use synthetic paste events (crash Sheets) or `navigator.clipboard.writeText` (hangs). The user may be editing the same sheet live — stop touching formatting when you see changes you did not make.
+
+**Bulk write (hundreds/thousands of rows, exact IDs) — preferred, used for the 1434-row Events tab:**
+1. Back up the user's clipboard: PowerShell `Add-Type System.Windows.Forms`; if `Clipboard::ContainsImage()` save `GetImage()` as PNG, else save `GetText()` to a file.
+2. On the dashboard tab build the TSV in JS (formulas included, `;` separators), put it in a `<pre>`, select it with `document.createRange().selectNodeContents(pre)`.
+3. In ONE `browser_batch`: `ctrl+c` on the dashboard tab → Sheets Name Box → clear the old range (`Delete`) → Name Box `A2` → **`ctrl+shift+v`** (plain text; plain `ctrl+v` pastes the HTML version and puts every line into column A) → wait → screenshot.
+4. Restore the clipboard (`SetImage` / `SetText`) immediately after.
+5. Verify with formula totals (e.g. `=SUM(...)` must equal the API count) and spot-check rows.
+Reading bulk data out of the browser: render it in a `<pre>` and use `get_page_text` (≤ 50 000 chars per call) instead of many small `javascript_tool` returns.
 
 ## Sponsored posts API
 `GET /admin/sponsored?page=1&limit=100&isEnd=false|true` → `data.sponsored[]` {sponsoredId, title, image, startDate, endDate, owner, municipality}, `data.totalSponsored`. `isEnd=false` = active (same split the dashboard shows). Detail: `GET /admin/sponsored/{id}`; create/edit/delete: POST / PATCH / DELETE `/admin/sponsored[/{id}]` (image upload prefix `sponsored.jpg-<ts>`).

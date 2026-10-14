@@ -18,6 +18,26 @@ Entry template:
 
 ---
 
+## 2026-10-14 — Live events overview in the "Events" tab (gid 1719318267)
+**User asked:** fill the Events tab with every live event only (expired ones fully removed): Edited Link, City, Region,
+Expired Date, Type; plus Region → amount (21 regions) and City → amount (290 kommuner).
+**New rules / preferences from the user:**
+- Type = "Recurring" for recurring places (they never expire → Expired Date left empty).
+- Type = "One time" for single-date AND multi-date events; Expired Date = the LAST date.
+- Only live events in the list; region and city counts next to it.
+**Result:** 1434 live events (193 one time, of which 72 multi-date; 1241 recurring), rows A2:E1435 sorted region → city →
+one time first → date. F/G: 21 regions + Total (=1434); H/I: 290 cities + Total (=1434); 231 cities have events, 59 have 0.
+Counts are formulas that ignore expired one-time rows automatically:
+`=COUNTIFS(C$2:C;F2;D$2:D;"")+COUNTIFS(C$2:C;F2;D$2:D;">="&TODAY())` (same with column B for cities).
+**What I learned (technical):**
+- `GET /admin/events?isEnd=false` = live list (`data.totalEvents`); its `lastDate` is null for many one-time events → use `GET /admin/events/{id}` `dates[]` and take the max endDate.
+- Municipality → region via `/admin/municipalities` (290 kommuner, 21 regions, names unique).
+- Bulk data from the browser into my context: render it in a `<pre>` on the dashboard tab and call `get_page_text` (max 50 000 chars per call).
+- Bulk write into Sheets with 100% accuracy (no hand-copying 18-digit IDs): put the TSV in a `<pre>`, select it with a Range, `ctrl+c` in that tab, then in Sheets jump to A2 and **`ctrl+shift+v`** (plain text — a normal ctrl+v of copied HTML puts every line in column A). Back up the user's clipboard first (PowerShell + System.Windows.Forms.Clipboard, text or image) and restore it right after.
+- Pasting past row 1000 adds rows automatically.
+**Mistakes + fixes:** first paste was ctrl+v (HTML) → all in column A → ctrl+z, re-pasted with ctrl+shift+v; F23 "Total" label did not land → typed it.
+**Open follow-ups:** the list is a snapshot — re-run weekly so expired one-time rows disappear (counts already exclude them).
+
 ## 2026-10-14 — Sponsored posts list in the Weekly_Events_Update sheet
 **User asked:** list every sponsored post from dashboard.fammap.app/sponsored (title + expired date) in the sheet tab
 "Sponsored" (gid 301227144): active ones on top, expired ones below in order, and a side column that shows the active
