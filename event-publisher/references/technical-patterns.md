@@ -416,3 +416,17 @@ Upload separately for place and event (do not share one S3 URL — deleting an i
 - On Windows, Python run with `-I` ignores `PYTHONIOENCODING`; use `python -I -X utf8` for UTF-8 output. Loops over files written by Python need `tr -d '\r'`.
 - Some kommun sites (gavle.se) time out from this network; WebFetch/curl fail too — use Wayback (`web.archive.org/web/2026…`) or the visit-site and flag it.
 - The local git repo needs `git -c safe.directory=*` (folder owned by another Windows SID).
+
+## Writing to the Weekly_Events_Update Google Sheet via Chrome (learned 2026-10-14)
+
+Sheet: `10LqkGw7IbEupkSeFvTjoPI8nY-4Go8Rf3YkjwP9m4bY` — tabs Events_Update (gid 0), Ticketmaster (857559120), Events, Sponsored (301227144). Locale is Swedish: formulas use `;` (e.g. `=COUNTIF(C2:C87;">"&NOW())`).
+No Google Sheets connector is available, so edit through the user's logged-in Chrome tab:
+1. Click the Name Box (≈ x47, y113 at 1568×698), type `<cell>\n` to jump.
+2. Type a whole column joined with `\n` (Enter moves down one row). One column per type call.
+3. Formulas: type once in the first row, then Name Box `D2:D87\n` + `ctrl+d` to fill down.
+4. An emoji as the first character of a cell is dropped → F2, Home, type emoji, Enter.
+5. Verify by jumping to cells and zooming on the formula bar (region ≈ 0,100 → 900,126).
+Never use synthetic paste events (crash Sheets), `navigator.clipboard.writeText` (hangs), or the OS clipboard (races with the user's own copy/paste). The user may be editing the same sheet live — stop touching formatting when you see changes you did not make.
+
+## Sponsored posts API
+`GET /admin/sponsored?page=1&limit=100&isEnd=false|true` → `data.sponsored[]` {sponsoredId, title, image, startDate, endDate, owner, municipality}, `data.totalSponsored`. `isEnd=false` = active (same split the dashboard shows). Detail: `GET /admin/sponsored/{id}`; create/edit/delete: POST / PATCH / DELETE `/admin/sponsored[/{id}]` (image upload prefix `sponsored.jpg-<ts>`).

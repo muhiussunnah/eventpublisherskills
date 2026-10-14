@@ -18,6 +18,23 @@ Entry template:
 
 ---
 
+## 2026-10-14 — Sponsored posts list in the Weekly_Events_Update sheet
+**User asked:** list every sponsored post from dashboard.fammap.app/sponsored (title + expired date) in the sheet tab
+"Sponsored" (gid 301227144): active ones on top, expired ones below in order, and a side column that shows the active
+count automatically.
+**Result:** 86 posts (6 active, 80 expired). Columns: `#`, `Title`, `Expired Date`, `Status` (`=IF(C2>NOW();"Active";"Expired")`),
+side block F: Total Active `=COUNTIF(C2:C87;">"&NOW())`, Total Expired, Total Sponsored. Active sorted by soonest
+expiry, expired sorted newest → oldest.
+**What I learned (technical):**
+- API: `GET /admin/sponsored?page=1&limit=100[&isEnd=false|true]` → `data.sponsored[]` {sponsoredId, title, image, startDate, endDate, owner, municipality}, `data.totalSponsored`. `isEnd` matches the dashboard's active/expired split (endDate "YYYY-MM-DD 00:00:00").
+- The sheet uses a Swedish locale → formula separators are `;`, ISO dates parse fine.
+- No Google Sheets connector in this setup; writing into the user's sheet via Chrome works like this:
+  Name Box (≈ x47,y113) → type `B1\n` → type the whole column joined with `\n` (Enter moves down). Formulas: type once, then select the range in the Name Box and `ctrl+d`.
+- Do NOT: dispatch a synthetic `paste` event into Sheets (it crashes the editor: "An error occurred"); call `navigator.clipboard.writeText` from the page (hangs the renderer); use the OS clipboard (`Set-Clipboard` + ctrl+v) — it races with the user's own copying and once pasted the user's screenshot instead (undone with ctrl+z). Python on Windows writes `\r\n`; an extra `\r` makes Sheets insert blank rows.
+- An emoji as the FIRST character of a typed cell gets dropped (starting edit mode swallows it); fix with F2 → Home → type emoji → Enter.
+**Mistakes + fixes:** blank rows from `\r\r\n` (undone); user's clipboard image pasted (undone); leading emojis dropped on 3 titles (re-added).
+**Open follow-ups:** the sorting is static — new sponsored posts need a re-run; Status and counts update by themselves.
+
 ## 2026-10-14 — GitHub home for the skill
 **User asked:** push the whole folder to https://github.com/muhiussunnah/eventpublisherskills so it can be downloaded
 on any computer, and keep writing every new learning into the skill files.
