@@ -18,6 +18,38 @@ Entry template:
 
 ---
 
+## 2026-10-18 — Södermanland permanent places (new region in the 0915 HTML) + Events tab refresh
+**User asked:** the client added new regions to `0915-Famies - Vad ska vi hitta pa idag.html`; find which region's places
+are not published yet, publish them with the full training (organizer → venue → event, 100% accuracy and quality), then
+update the Events tab in the sheet like before.
+**Result:** only Södermanland was new (52 places; 4 already in the app) + 1 missed Örebro place (Knutsbol, Degerfors) →
+49 researched, **40 published, 9 skipped**. Audit: 0 issues (municipality, ages, recurrence, interests, CTA, unique titles
+and images). Events tab: 1465 live events, region/city totals 1465, Södermanland 44.
+Report: `SODERMANLAND-PERMANENT-PLACES-FINAL-REPORT-2026-10-18.md`.
+**New rules / preferences (from the user's standing requests, applied again):**
+- Check the whole app first, publish only what is missing; keep using the Gävleborg workflow and quality bar.
+- After the work, refresh the Events tab the same way (values only — the user had restyled the sheet, keep their formatting).
+**What I learned (technical):**
+- Reuse operator orgs that already exist: "Medley" (swim halls), "Nordiska museet" (Julita gård); chain venues use one org
+  per location ("Leos Lekland <City>").
+- Publishing loop hardening: `cache: 'no-store'` + AbortController on wsrv/API fetches; background runner + polling to beat
+  the 45 s CDP limit; reload the tab before retrying a stuck publish; persist image hashes in localStorage.
+- `Failed to fetch` (no steps) = slow origin behind wsrv → retry; nothing was created.
+- Non-ASCII social URLs fail the API's `uri` format (code 1006) → `encodeURI()`.
+- Sheets Name Box: a range beyond the last row shows "Invalid range" → use `A2:I`. F23 "Total" drops on paste → re-type.
+- Skips that are correct even when the HTML lists the place: permanently closed (Hop N Pop), renovation (Vingåkersbadet),
+  place doesn't exist under that name (Stadsparken Nyköping), not family relevant (church, adult spa, cinema building),
+  no confirmed season (Museet Malmahed), association possibly dissolved (Knutsbol).
+- Unknown entrance fee → `isFree: false` (never promise "free" without a source) and flag it.
+**Mistakes + fixes:**
+- First Katrineholm publish hung (stuck cached wsrv body) → page reload, helpers re-installed with no-store + timeouts; no duplicates.
+- ÖSlJ org create failed on the Facebook URL with "Ö" → percent-encoded; the helper deleted the orphan avatar automatically.
+- Name Box `A2:I3000` → "Invalid range" dialog → closed it, used `A2:I`.
+**Files updated:** `SODERMANLAND-PERMANENT-PLACES-FINAL-REPORT-2026-10-18.md`, `references/technical-patterns.md`
+(robust loop, organizer picking, finding unpublished places, Sheets range/F23 notes), `SKILL.md` (v1.40.0), this log.
+**Open follow-ups:** see the report — 2027 seasons copied from 2026 (12 places), Trosa Aktivitetspark ends 2026-11-05,
+re-check Vingåkersbadet (March 2027), Malmahed, Knutsbol, Grassagården.
+
 ## 2026-10-14 — Live events overview in the "Events" tab (gid 1719318267)
 **User asked:** fill the Events tab with every live event only (expired ones fully removed): Edited Link, City, Region,
 Expired Date, Type; plus Region → amount (21 regions) and City → amount (290 kommuner).

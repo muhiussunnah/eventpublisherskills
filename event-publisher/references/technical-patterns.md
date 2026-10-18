@@ -417,6 +417,35 @@ Upload separately for place and event (do not share one S3 URL — deleting an i
 - Some kommun sites (gavle.se) time out from this network; WebFetch/curl fail too — use Wayback (`web.archive.org/web/2026…`) or the visit-site and flag it.
 - The local git repo needs `git -c safe.directory=*` (folder owned by another Windows SID).
 
+### Robust publishing loop (learned 2026-10-18, Södermanland run)
+- **Stuck fetch:** a wsrv response body that never finishes (Chrome cache entry from an earlier timed-out call) blocks
+  `__publishPlace` forever. Fetch images and lists with `cache: 'no-store'` + an `AbortController` timeout (40–60 s).
+- **CDP 45 s limit:** run each place (or a queue of places) in the background and poll:
+  `window.__runBg(key, spec)` / `window.__queueRun(list, tag)` store results in `window.__bg[...]`; check them with short
+  `javascript_tool` calls (`await new Promise(r => setTimeout(r, 25000))` inside one call is fine).
+- If a publish promise is stuck and might resume later, **reload the dashboard tab** before re-publishing (kills the old
+  promise, so no duplicate place/event can be created) and re-install the helpers. Keep the session image hashes in
+  `localStorage` (`__r2hashes`) so the duplicate-image guard survives the reload.
+- `Failed to fetch` with no steps = wsrv could not get the origin image in time (slow origin site, ~13 s). Nothing was
+  created → simply retry once wsrv has cached it.
+- Org/place URLs must be valid URIs: a Facebook URL with `Ö/ä` gives `400 /body/facebook must match format "uri"
+  (code 1006)` → `encodeURI()` the URL first.
+- Crop away edge text with wsrv `&a=left|right` (e.g. a phone number painted on a boat hull).
+
+### Picking organizers (learned 2026-10-18)
+- Reuse existing operator orgs by exact name: **"Medley"** (all Medley-run swim halls), **"Nordiska museet"** (Julita gård).
+- Chains already in the app use one org per location: "Leos Lekland <City>" with the location's own phone/email/website
+  (email is unique, so never the chain's shared email).
+- Places run by a kommun → "X kommun" (gov); state/regional museums → museum's own name ("Sörmlands museum", gov);
+  foundations/associations → their legal name ("Stiftelsen …", "Föreningen …", "… hembygdsförening").
+- Small associations often publish only named people's mobiles → leave phone null (privacy rule); no logo → avatar null.
+
+### Finding which places are still unpublished in a new HTML
+1. Extract `const EMBEDDED = {...}` → `places[]` (country Sverige), group by `region` / `municipality`.
+2. Count app places per municipality (`/admin/places` pages, `place.municipality.name`).
+3. Regions whose kommuner have 0–1 app places are the new ones; then name/1 km duplicate-check each candidate
+   (the 0915 file: only Södermanland was new, 4 of its 52 already existed, plus one missed Örebro place).
+
 ## Writing to the Weekly_Events_Update Google Sheet via Chrome (learned 2026-10-14)
 
 Sheet: `10LqkGw7IbEupkSeFvTjoPI8nY-4Go8Rf3YkjwP9m4bY` — tabs Events_Update (gid 0), Ticketmaster (857559120), Events, Sponsored (301227144). Locale is Swedish: formulas use `;` (e.g. `=COUNTIF(C2:C87;">"&NOW())`).
@@ -434,6 +463,10 @@ Never use synthetic paste events (crash Sheets) or `navigator.clipboard.writeTex
 3. In ONE `browser_batch`: `ctrl+c` on the dashboard tab → Sheets Name Box → clear the old range (`Delete`) → Name Box `A2` → **`ctrl+shift+v`** (plain text; plain `ctrl+v` pastes the HTML version and puts every line into column A) → wait → screenshot.
 4. Restore the clipboard (`SetImage` / `SetText`) immediately after.
 5. Verify with formula totals (e.g. `=SUM(...)` must equal the API count) and spot-check rows.
+6. Clearing: the Name Box rejects ranges past the sheet's last row ("Invalid range … exceeds the sheet size") → use the
+   open-ended range `A2:I` + `Delete`. The paste adds rows automatically.
+7. The region "Total" label in F23 has been dropped by the paste twice (2026-10-14 and 2026-10-18) → always check F23
+   and type `Total` if it is empty.
 Reading bulk data out of the browser: render it in a `<pre>` and use `get_page_text` (≤ 50 000 chars per call) instead of many small `javascript_tool` returns.
 
 ## Sponsored posts API

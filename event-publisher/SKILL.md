@@ -1,7 +1,7 @@
 ---
 name: event-publisher
-skill_version: "1.39.0"
-last_updated: "2026-10-14"
+skill_version: "1.40.0"
+last_updated: "2026-10-18"
 rule_count: 24
 rules_file: references/event-rules.md
 learning_log: LEARNING-LOG.md
@@ -155,11 +155,15 @@ Click "Create Event" (or "Update Event" if editing). Verify the page redirects b
 
 Used when the user gives a list of **permanent family places** (e.g. the "Vad ska vi hitta på idag?" HTML with
 embedded `places`, filtered by `region`) instead of a dated event calendar. Full API details:
-`references/technical-patterns.md` → "Permanent Places Publishing". First run: Gävleborg 2026-10-13
-(`GAVLEBORG-PERMANENT-PLACES-FINAL-REPORT-2026-10-13.md`, 52 published).
+`references/technical-patterns.md` → "Permanent Places Publishing". Runs: Gävleborg 2026-10-13
+(`GAVLEBORG-PERMANENT-PLACES-FINAL-REPORT-2026-10-13.md`, 52 published), Södermanland 2026-10-18
+(`SODERMANLAND-PERMANENT-PLACES-FINAL-REPORT-2026-10-18.md`, 40 published).
 
+0. **New HTML version?** Find what is unpublished: compare places per region/kommun in the HTML with the app's place
+   counts; only the regions (and stray places) that are missing get researched.
 1. **Duplicate check first** — against ALL existing places, events and organizers (name tokens + places within
    ~1 km of the coordinates). Also catch duplicates inside the input list itself. Already-published → skip.
+   Reuse existing operator orgs (Medley, Nordiska museet, kommun orgs) instead of creating look-alikes.
 2. **Research each place** (parallel research subagents are fine): status (open/closed), real operator,
    legal/official organizer name, phone, generic email, website, Instagram/Facebook/YouTube, logo, exact address,
    OSM/official coordinates, opening hours + season, 2–3 real images from the official site / visit-site.
