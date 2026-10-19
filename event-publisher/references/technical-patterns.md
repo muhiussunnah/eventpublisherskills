@@ -469,6 +469,32 @@ Never use synthetic paste events (crash Sheets) or `navigator.clipboard.writeTex
    and type `Total` if it is empty.
 Reading bulk data out of the browser: render it in a `<pre>` and use `get_page_text` (≤ 50 000 chars per call) instead of many small `javascript_tool` returns.
 
+## Image quality sweep of all live events (learned 2026-10-19)
+1. **Gallery review:** on the dashboard tab render every live event's `images[0]` as 126 px wsrv thumbnails in a CSS grid
+   (one-time events first, labelled with their index), page 84 at a time with `__showPage(start, n)` and screenshot.
+   Flag: text/posters/logos, collages, borders, maps/renders, dark/blurry, empty buildings/parking lots, adult-only
+   bar scenes, hotlinked non-S3 URLs.
+2. **One-time / multi-date events → Gemini** (gemini.google.com/app, user logged in). Prompt pattern:
+   `Generate an image: full-bleed edge-to-edge square photo, no border, no frame: <Swedish kids/families doing the exact
+   activity of the event, place type, season>, natural candid documentary style, no text, no letters, no logos, no watermark`
+   ("full-bleed … no border" is needed — without it Gemini sometimes adds a white frame). ~25–40 s per image.
+   - The image is a `blob:` URL and the `lh3…/rd-gg-dl/…` URL is 403 outside Gemini; Gemini can't call api.fammap.app
+     (CORS). Working transfer: click Gemini's **"Copy image"** button with a real coordinate click (a JS `.click()` does
+     NOT copy) → `ctrl+v` on the dashboard tab where a `paste` listener stores the PNG blob → canvas centre-crop to
+     1080×1080 JPEG → SHA-256 de-dup → `POST /admin/image` (`event.jpg-<ts>`) → PATCH. Back up / restore the user's
+     clipboard around the session.
+   - Wait for the new image by counting `button[aria-label="Copy image"]` (`__waitNew(prev)`) — fixed sleeps fail when
+     the chat gets long. Preview every pasted image before applying.
+3. **Permanent places → real photos** via research subagents (official site → kommun/visit site → Wikimedia Commons
+   `thumb.wikimedia.org/.../1280px-…`; `upload.wikimedia.org` gives 429 through wsrv). Contact-sheet review, then
+   wsrv 1080 crop → upload → PATCH.
+4. **PATCH body for an image change** = GET the event and resend everything: `placeId (ev.place.placeId), title,
+   description, images:[new], lat, lng, address, isFree, parent/child ages, ctaLink, ctaText, interestIds` +
+   `isRecurring:true, recurrence` (recurring) or `isRecurring:false, dates` (dated). Verify after: title, description,
+   dates/recurrence, interests, ages, ctaLink, place unchanged. Recurring events return `dates: null` — guard the check.
+5. Don't put family stock images on adult-only events (concerts 18+, courses, senior clubs) — report those for
+   unpublishing instead. Places found closed/non-existent during the sweep are reported, not edited.
+
 ## Weekly (Monday) report — how to count (learned 2026-10-19)
 - **Events Live** = `GET /admin/events?page=1&limit=1&isEnd=false` → `data.totalEvents` (split by `status`: ongoing / upcoming).
 - **Sponsored Live** = `GET /admin/sponsored?page=1&limit=1&isEnd=false` → `data.totalSponsored` (detail has `video`).

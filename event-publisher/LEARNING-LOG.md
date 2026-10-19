@@ -18,6 +18,24 @@ Entry template:
 
 ---
 
+## 2026-10-19 — Image quality sweep of all 1460 live events
+**User asked:** go through every event image (gallery view), replace the ones that don't fit the family audience with
+better ones: Gemini images (unique, Swedish-looking) for one-time/multi-date events, real photos from the place's
+own website/socials for permanent places — content quality 100/100.
+**Result:** all 1460 thumbnails reviewed → **80 images replaced**: 47 one-time/multi-date events with unique Gemini images
+(Babblarna ×7, Ticketmaster shows, Konserthuset family concerts, Tekniska museet, Junibacken, workshops…), 33 permanent
+places with real photos (Laserdome, JumpYard, DVVJ, go-kart, Astrid Lindgrens Näs, Högevallsbadet, Saab museum…).
+Every PATCH verified: only `images` changed; 0 duplicate URLs; all on S3. Not changed, reported to the user:
+4 places closed/doubtful (Vasalundshallen pool closed 2022, Tolvåkerbadet closed 2023, "Aqua Nova" Örebro not a real
+venue, O'Learys Ystad no usable photo) and ~25 adult-only events (UKK concerts, Huddinge jazz, Ringmasters, Cirkus
+Cirkör drama, Lymfmassör course, senior clubs) that should be unpublished rather than given family images.
+**What I learned (technical):** Gemini → clipboard → dashboard paste pipeline, `__waitNew` counter, "full-bleed no
+border" prompt, PATCH body rules, Wikimedia thumb URLs — see technical-patterns.md "Image quality sweep".
+**Mistakes + fixes:** one Gemini image came with a white frame → re-generated with "full-bleed, no border"; a copy
+fired before the image existed → wait by button count; a result echoing an old URL with a query string was blocked by
+the output filter → sanitise `?&=` in results; the verify step crashed on recurring events (`dates: null`) after the
+PATCH had already succeeded → re-verified all 33 by re-fetching.
+
 ## 2026-10-19 — Monday report + Ticketmaster expired check
 **User asked:** Monday report (Events Live, Sponsored Live, Ticketmaster Live, Universal content/article), then mark the
 Ticketmaster events that expired since last week (sheet tab "Ticketmaster", gid 857559120) with a red background.
