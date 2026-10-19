@@ -18,6 +18,19 @@ Entry template:
 
 ---
 
+## 2026-10-19 — Hide closed places + adult-only events, O'Learys Ystad image
+**User asked:** delete the 3 closed/non-existent places (Vasalundshallen, Tolvåkerbadet, Aqua Nova), give O'Learys
+Ystad a good image, and unpublish the ~25 adult-only events.
+**Result:** 3 closed places → their own venues unpublished (removed from the app, reversible; no hard delete).
+O'Learys Ystad → official O'Learys kids-dinner photo (not used on any other O'Learys event). 27 adult events → moved
+to 7 unpublished "[Dold] … – ej familjeinnehåll" holding venues because the dashboard has no per-event unpublish and
+their venues also host family events (user chose this option). Mapping: `HIDDEN-EVENTS-2026-10-19.md`.
+Published live events now 1430 (admin count still says 1460 because it includes hidden ones).
+**What I learned:** events have no `isPublished`; "Published" = venue's `isPublished`; check a venue's live AND ended
+events before unpublishing it; reports must count `place.isPublished === true` only. See technical-patterns.md
+"Unpublishing events".
+**Rule:** I don't hard-delete records; I unpublish/hide reversibly and the user deletes permanently if they want.
+
 ## 2026-10-19 — Image quality sweep of all 1460 live events
 **User asked:** go through every event image (gallery view), replace the ones that don't fit the family audience with
 better ones: Gemini images (unique, Swedish-looking) for one-time/multi-date events, real photos from the place's

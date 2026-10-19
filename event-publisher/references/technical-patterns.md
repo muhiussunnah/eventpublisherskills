@@ -495,8 +495,24 @@ Reading bulk data out of the browser: render it in a `<pre>` and use `get_page_t
 5. Don't put family stock images on adult-only events (concerts 18+, courses, senior clubs) — report those for
    unpublishing instead. Places found closed/non-existent during the sweep are reported, not edited.
 
+## Unpublishing events (learned 2026-10-19)
+- Events have **no publish flag** (event schema has no `isPublished`). The dashboard's "Published" column shows
+  `place.isPublished`. Unpublishing a venue hides **every** event at that venue.
+- Venue has only the events to hide (closed places) → `PATCH /admin/places/{id}` with the full place body
+  (`organizationId, municipalityId, interestId?, images, openingHours, lat, lng, address, website, phoneNumber,
+  email?, title, description, ctaLink, ctaText, instagram, facebook, youtube`) + `isPublished:false`.
+- Venue shared with family events (UKK/Stadsbiblioteket, Huddinge Kulturhus, Nya Cirkus, "general venue"s,
+  Ticketmaster Sverige) → create an unpublished holding venue `[Dold] <venue> – ej familjeinnehåll` (same organizer,
+  `isPublished:false`) and PATCH the events' `placeId` to it. Reversible: PATCH `placeId` back. Keep the mapping in
+  `HIDDEN-EVENTS-<date>.md`. Never hard-delete; if the user wants permanent deletion they do it in the dashboard.
+- Check a venue's other events (live **and** ended: `/admin/events?isEnd=true` pages; `placeId` is not a filter)
+  before unpublishing it.
+- Counts: `/admin/events?isEnd=false` includes events on unpublished venues → for reports, subtract them
+  (filter `place.isPublished === true`).
+
 ## Weekly (Monday) report — how to count (learned 2026-10-19)
-- **Events Live** = `GET /admin/events?page=1&limit=1&isEnd=false` → `data.totalEvents` (split by `status`: ongoing / upcoming).
+- **Events Live** = `GET /admin/events?isEnd=false` (all pages) counting only `place.isPublished === true`
+  (`data.totalEvents` also counts hidden events on unpublished venues); split by `status`: ongoing / upcoming.
 - **Sponsored Live** = `GET /admin/sponsored?page=1&limit=1&isEnd=false` → `data.totalSponsored` (detail has `video`).
 - **Ticketmaster Live** = live events whose `ctaLink`/description contains `ticketmaster` (scan `GET /admin/events/{id}`
   for all live events, ~1500 calls in batches of 15, run in the background) — NOT the organizer "Ticketmaster" (that
