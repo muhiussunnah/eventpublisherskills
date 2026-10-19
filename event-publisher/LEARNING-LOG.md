@@ -18,6 +18,23 @@ Entry template:
 
 ---
 
+## 2026-10-19 — Monday report + Ticketmaster expired check
+**User asked:** Monday report (Events Live, Sponsored Live, Ticketmaster Live, Universal content/article), then mark the
+Ticketmaster events that expired since last week (sheet tab "Ticketmaster", gid 857559120) with a red background.
+**Result:** Events live 1460 (1316 ongoing + 144 upcoming) · Sponsored live 6 (all video) · Contents published 857 of 952 ·
+Ticketmaster: of the 36 rows in the sheet only **2 expired** (rows 2–3, Babblarna 17/18 Oct) → red (light red 1, A2:E3);
+34 still live + 1 live Ticketmaster event missing from the sheet (Djungelboken The Musical, 404507055529952692) = 35.
+**What I learned (technical):**
+- **Ticketmaster events are NOT identified by the organizer.** Only 17 live events have organizer "Ticketmaster"; the
+  others sit under the venue/kommun organizer. Count Ticketmaster = live events whose ctaLink/description contains
+  `ticketmaster` (needs `GET /admin/events/{id}`, the list has no ctaLink) + the rows of the sheet's Ticketmaster tab
+  (one row, Trollkarlen från Oz, links to intiman.se). My first report said 17 — corrected to 35.
+- Expired check for a sheet list: take the edit-link IDs from the tab and test each against `GET /admin/events?isEnd=false`.
+- Read a sheet tab as text without downloading: `…/gviz/tq?tqx=out:html&gid=<gid>` + `get_page_text`.
+- Contents API: `GET /admin/contents?page&limit=100` → `data.contents[]` {contentId, title, images, targetFilters, isPublished}, `data.totalContents`.
+- Sponsored detail has a `video` field (all 6 live posts are videos).
+- Ticketmaster tab F2 `=COUNTA(A2:A)` counts all rows, not only live ones.
+
 ## 2026-10-18 — Södermanland permanent places (new region in the 0915 HTML) + Events tab refresh
 **User asked:** the client added new regions to `0915-Famies - Vad ska vi hitta pa idag.html`; find which region's places
 are not published yet, publish them with the full training (organizer → venue → event, 100% accuracy and quality), then

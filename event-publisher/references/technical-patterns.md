@@ -469,5 +469,13 @@ Never use synthetic paste events (crash Sheets) or `navigator.clipboard.writeTex
    and type `Total` if it is empty.
 Reading bulk data out of the browser: render it in a `<pre>` and use `get_page_text` (≤ 50 000 chars per call) instead of many small `javascript_tool` returns.
 
+## Weekly (Monday) report — how to count (learned 2026-10-19)
+- **Events Live** = `GET /admin/events?page=1&limit=1&isEnd=false` → `data.totalEvents` (split by `status`: ongoing / upcoming).
+- **Sponsored Live** = `GET /admin/sponsored?page=1&limit=1&isEnd=false` → `data.totalSponsored` (detail has `video`).
+- **Ticketmaster Live** = live events whose `ctaLink`/description contains `ticketmaster` (scan `GET /admin/events/{id}`
+  for all live events, ~1500 calls in batches of 15, run in the background) — NOT the organizer "Ticketmaster" (that
+  undercounts by half). Cross-check with the sheet's Ticketmaster tab; mark rows whose ID is no longer live in red.
+- **Universal content/article** = `GET /admin/contents` → count `isPublished: true` (also report the total).
+
 ## Sponsored posts API
 `GET /admin/sponsored?page=1&limit=100&isEnd=false|true` → `data.sponsored[]` {sponsoredId, title, image, startDate, endDate, owner, municipality}, `data.totalSponsored`. `isEnd=false` = active (same split the dashboard shows). Detail: `GET /admin/sponsored/{id}`; create/edit/delete: POST / PATCH / DELETE `/admin/sponsored[/{id}]` (image upload prefix `sponsored.jpg-<ts>`).
