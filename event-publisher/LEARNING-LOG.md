@@ -34,6 +34,15 @@ Ticketmaster: of the 36 rows in the sheet only **2 expired** (rows 2–3, Babbla
 - Contents API: `GET /admin/contents?page&limit=100` → `data.contents[]` {contentId, title, images, targetFilters, isPublished}, `data.totalContents`.
 - Sponsored detail has a `video` field (all 6 live posts are videos).
 - Ticketmaster tab F2 `=COUNTA(A2:A)` counts all rows, not only live ones.
+**Follow-up the same day (user asked):** added Djungelboken (row 38), added column **G "Last Date"** (ISO last date of
+every row from `GET /admin/events/{id}` `dates[]`), and changed F2 to `=COUNTIF(G2:G;">="&TODAY())` → 35, updates by itself
+every day. Column D is free text ("13–21 mars 2027", "nov. 05, 2026"), so a formula cannot read it — keep G filled when
+adding new Ticketmaster rows.
+- Sheets formatting tricks: Paint format with a multi-row source (E1:E38) + one click on the target's top cell copies
+  the whole block; it also copies the number format → re-apply Format › Number › Date to date cells afterwards.
+- **Why the first count was wrong (user asked):** I assumed every Ticketmaster event sits under the organizer
+  "Ticketmaster" and did not cross-check the sheet list or the ticket links. Rule: verify a count against the user's own
+  list/source before reporting it.
 
 ## 2026-10-18 — Södermanland permanent places (new region in the 0915 HTML) + Events tab refresh
 **User asked:** the client added new regions to `0915-Famies - Vad ska vi hitta pa idag.html`; find which region's places

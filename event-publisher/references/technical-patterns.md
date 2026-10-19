@@ -475,6 +475,9 @@ Reading bulk data out of the browser: render it in a `<pre>` and use `get_page_t
 - **Ticketmaster Live** = live events whose `ctaLink`/description contains `ticketmaster` (scan `GET /admin/events/{id}`
   for all live events, ~1500 calls in batches of 15, run in the background) — NOT the organizer "Ticketmaster" (that
   undercounts by half). Cross-check with the sheet's Ticketmaster tab; mark rows whose ID is no longer live in red.
+- **Ticketmaster tab layout** (gid 857559120): A Event Title · B Edited Link · C Source URL · D Date (free text) · E City ·
+  F2 `=COUNTIF(G2:G;">="&TODAY())` (Total Ticketmaster Live) · G Last Date (ISO, from the event's `dates[]`).
+  New row = fill A–E + G; copy the format of the row above with Paint format. Expired rows: light red 1 background on A:E (+G).
 - **Universal content/article** = `GET /admin/contents` → count `isPublished: true` (also report the total).
 
 ## Sponsored posts API
