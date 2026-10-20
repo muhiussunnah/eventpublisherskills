@@ -467,6 +467,11 @@ Never use synthetic paste events (crash Sheets) or `navigator.clipboard.writeTex
    open-ended range `A2:I` + `Delete`. The paste adds rows automatically.
 7. The region "Total" label in F23 has been dropped by the paste twice (2026-10-14 and 2026-10-18) → always check F23
    and type `Total` if it is empty.
+8. **Check for leftover old rows** after the paste (2026-10-20: the `Delete` on `A2:I` silently did not clear, the new
+   1430 rows overwrote 2–1431 and 35 old rows stayed below → G23 showed 1465). Jump to the first row after the new data
+   and, if it is not empty, select `A<n>:E` and `Delete`. G23 and I292 must equal the API count.
+9. The Events tab lists only **published** live events (`place.isPublished === true`); hidden events on unpublished
+   holding venues are left out.
 Reading bulk data out of the browser: render it in a `<pre>` and use `get_page_text` (≤ 50 000 chars per call) instead of many small `javascript_tool` returns.
 
 ## Image quality sweep of all live events (learned 2026-10-19)
@@ -521,6 +526,9 @@ Reading bulk data out of the browser: render it in a `<pre>` and use `get_page_t
   F2 `=COUNTIF(G2:G;">="&TODAY())` (Total Ticketmaster Live) · G Last Date (ISO, from the event's `dates[]`).
   New row = fill A–E + G; copy the format of the row above with Paint format. Expired rows: light red 1 background on A:E (+G).
 - **Universal content/article** = `GET /admin/contents` → count `isPublished: true` (also report the total).
+- The Ticketmaster scan calls `GET /admin/events/{id}` ~1500 times: run ONE job only, batches of 6 with a 250 ms pause
+  and retry on HTTP 429 ("Too many requests") — two parallel scans got rate-limited and silently dropped events
+  (30 vs 31 found). Track failures and only report when `fail = 0`.
 
 ## Sponsored posts API
 `GET /admin/sponsored?page=1&limit=100&isEnd=false|true` → `data.sponsored[]` {sponsoredId, title, image, startDate, endDate, owner, municipality}, `data.totalSponsored`. `isEnd=false` = active (same split the dashboard shows). Detail: `GET /admin/sponsored/{id}`; create/edit/delete: POST / PATCH / DELETE `/admin/sponsored[/{id}]` (image upload prefix `sponsored.jpg-<ts>`).

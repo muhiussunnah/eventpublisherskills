@@ -18,6 +18,15 @@ Entry template:
 
 ---
 
+## 2026-10-20 — Events tab refresh + client report
+**User asked:** update the Events tab with every live event, matched with the dashboard; (and the pending client report).
+**Result:** 1430 published live events (1277 recurring, 153 one time; 1313 ongoing, 117 upcoming) — dashboard shows 1460
+non-expired because 30 are hidden on unpublished venues. Region/City totals 1430. Report: Sponsored 6 (all video),
+Ticketmaster 33 (sheet rows; 2 sheet rows are now hidden: Elvis Nya Cirkus, Ringmasters), Contents 857/952 published.
+**Mistakes + fixes:** leftover old rows below the paste (Delete on the Name Box range didn't clear) → G23 1465 →
+cleared `A1432:E`; parallel Ticketmaster scans hit HTTP 429 → re-ran one throttled scan with retries (fail 0).
+User had to sign in once (session expired) — I don't type or submit passwords.
+
 ## 2026-10-19 — Hide closed places + adult-only events, O'Learys Ystad image
 **User asked:** delete the 3 closed/non-existent places (Vasalundshallen, Tolvåkerbadet, Aqua Nova), give O'Learys
 Ystad a good image, and unpublish the ~25 adult-only events.
