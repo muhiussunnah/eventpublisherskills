@@ -1,6 +1,6 @@
 ---
 name: event-publisher
-skill_version: "1.46.0"
+skill_version: "1.47.0"
 last_updated: "2026-10-21"
 rule_count: 24
 rules_file: references/event-rules.md
@@ -191,6 +191,12 @@ of each city bold), C = Total Sources Amount (`=COUNTIF(B$2:B;B<row>)` on each c
 research (CEO: "we are missing big sources") took it from 176 → **371** sources for the 27 cities; new rows are
 light green. Full list + reasons: `SOURCES-RESEARCH-STOCKHOLM-UPPSALA-2026-10-21.md`; method:
 `references/technical-patterns.md` → "Finding new event sources per city".
+
+**All other 263 kommuner (20 regions)** are in the **Sources_Sweden** tab (gid 915487470): A Region (län) | B City |
+C Source URL | D City total | E Region total, plus a 21-region summary in G:J (Total Sweden: 290 kommuner, 2 288
+sources incl. Events_Update). First row of each city/region is bolded by a conditional-format rule (`=A2<>A1` on
+A2:B). Details per region: `sources-sweden/README.md` + `sources-sweden/<region>.md`; machine-readable list with
+type/gives/notes (how to read JS-only calendars): `sources-sweden/sources-sweden.json`.
 
 When scraping a city, work through **all** its rows, biggest first:
 1. **Kommun lov pages** (höstlov/jullov/sportlov/påsklov/sommarlov) — biggest family-event source; the URL often

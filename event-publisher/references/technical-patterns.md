@@ -573,5 +573,26 @@ What the 2026-10-21 run found (reuse next time):
   Lidingö's old `…evenemangskalender.4.56084d…html` is 404 and Vallentuna's old `/evenemang-och-upplevelser/…`
   redirects — both replaced.
 
+### Whole-Sweden run (2026-10-21, same day) — what changed at scale
+- 263 kommuner → 34 groups (≈6–10 kommuner each; Göteborg/Malmö in small groups), one subagent per group, max 20
+  subagents at once (harness limit) → start the next group each time one finishes. Brief: `brief_sweden.md` pattern
+  (checklist of 11 source kinds, per-size targets, mandatory fetch, write JSON after every kommun, 15-line reply).
+- **De-dup gotcha:** do NOT strip `#…` when the fragment is a route/filter (`#/?location=X` on Axiell Arena library
+  calendars) — only strip plain anchors; otherwise every per-library filter collapses into one URL.
+- Regional sources shared by two kommuner (naturum, oland.se, Film i Glasriket) are kept once (first kommun).
+- **Bulk paste without the browser `<pre>`:** put the TSV straight on the clipboard with PowerShell
+  (`[Windows.Forms.Clipboard]::SetText([IO.File]::ReadAllText(tsv, UTF8))`) after backing it up, Name Box `A1` →
+  `Escape` → `ctrl+shift+v`, restore the clipboard. 1 918 rows × 10 cols pasted in one go.
+- **Verify 2 000 rows cheaply:** hash rows in chunks of 50 (djb2 of `A|B|C|D|E` lines) in Python and in the browser
+  (gviz CSV), compare 39 numbers; drill into a chunk only if it differs.
+- New tab: `+` at bottom-left (≈53, 682) → double-click the tab → `ctrl+a`, type name, Enter. Freeze: View → Freeze →
+  1 row. Bold first rows at scale: Format → Conditional formatting → "Custom formula is" `=A2<>A1` on `A2:B<n>`,
+  style Bold + fill None (no per-cell clicking). Column width: right-click header → Resize column → pixels.
+- Scraping facts found everywhere: evenemang.se 403 (Cloudflare); Tickster city slugs need å/ä/ö
+  (`/in/v%C3%A4xj%C3%B6`); Svenska kyrkan calendars are JS (use `svenskakyrkan.se/kalender?type=owner&id=…` URLs;
+  their item counts are ALL items, not family items); many kommun calendars are Cruncho / Sitevision / Västsverige
+  businesslist / Visit Värmland TurID JSON feeds (notes in `sources-sweden.json`); Naturkartan often 404 on
+  `/sv/<kommun>` → use `/sv/municipalities/<kommun>`; several sites 403 a bare UA but load with a full Chrome UA.
+
 ## Sponsored posts API
 `GET /admin/sponsored?page=1&limit=100&isEnd=false|true` → `data.sponsored[]` {sponsoredId, title, image, startDate, endDate, owner, municipality}, `data.totalSponsored`. `isEnd=false` = active (same split the dashboard shows). Detail: `GET /admin/sponsored/{id}`; create/edit/delete: POST / PATCH / DELETE `/admin/sponsored[/{id}]` (image upload prefix `sponsored.jpg-<ts>`).

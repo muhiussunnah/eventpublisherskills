@@ -18,6 +18,24 @@ Entry template:
 
 ---
 
+## 2026-10-21 — Source research for ALL of Sweden (21 regions, 290 kommuner)
+**User asked:** do the same source research region by region, city by city for the other 20 regions (290 kommuner
+in total, Stockholm was only the first).
+**User chose (asked once):** a new tab **Sources_Sweden** (Region | City | Source URL | City total | Region total);
+Events_Update stays as it is.
+**Result:** 34 research agents → **1 917 new sources for 263 kommuner** (every kommun covered, 3–29 each; 47 marked
+not verified because the site was down/blocked) + 371 in Events_Update = **2 288 sources for 290 kommuner**.
+Pasted, verified 1 917/1 917 rows by chunk hashes, summary G:J (Total Sweden 290 / 2 288), header frozen, first row
+of each city/region bold via conditional format. Reports: `sources-sweden/README.md` (CEO answer, totals, top 40,
+not-verified list) + one file per region + `sources-sweden.json`.
+**What I learned:** see technical-patterns.md "Whole-Sweden run" — clipboard paste via PowerShell, chunk-hash verify,
+`#/?location=` filters must survive de-dup, Svenska kyrkan counts are not family counts, Tickster needs å/ä/ö slugs.
+**Mistakes + fixes:** my URL normaliser stripped `#…` and merged 13 per-library filter URLs (Axiell Arena) as
+"duplicates" → fixed to keep route/filter fragments; the first report draft named Svenska kyrkan calendars as the
+"biggest family source" (their counts are all items) → excluded kyrka/ticketing from that ranking.
+**Open follow-ups:** re-check the 47 not-verified rows (emmaboda.se, gavle.se, landskrona.se, herrljunga.se,
+vargarda.se, lycksele.se, bibblo.se, overtornea.se …); lov URLs change every holiday.
+
 ## 2026-10-21 — City-wise source research (CEO: "we are missing big sources")
 **User asked:** research city by city the best event sources we are missing (temporary events + permanent places,
 unique, top class), add them to the Events_Update tab and fill in each city's total number of sources.
