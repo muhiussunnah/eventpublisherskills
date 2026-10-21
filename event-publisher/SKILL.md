@@ -1,7 +1,7 @@
 ---
 name: event-publisher
-skill_version: "1.45.0"
-last_updated: "2026-10-20"
+skill_version: "1.46.0"
+last_updated: "2026-10-21"
 rule_count: 24
 rules_file: references/event-rules.md
 learning_log: LEARNING-LOG.md
@@ -183,6 +183,23 @@ embedded `places`, filtered by `region`) instead of a dated event calendar. Full
 8. **Privacy** — only generic/business contacts. Never personal-name emails or private individuals' phones.
 9. **Audit after publishing** — re-fetch all events of the region: no duplicate titles/images, municipality set,
    ages, recurrence, CTA, interests; visual contact-sheet check of every event image and avatar.
+
+## Event Sources per City (Events_Update tab) — NEW 2026-10-21
+
+The sheet's **Events_Update** tab is the master list of where we find events: A = Source URL, B = City (first row
+of each city bold), C = Total Sources Amount (`=COUNTIF(B$2:B;B<row>)` on each city's first row). 2026-10-21
+research (CEO: "we are missing big sources") took it from 176 → **371** sources for the 27 cities; new rows are
+light green. Full list + reasons: `SOURCES-RESEARCH-STOCKHOLM-UPPSALA-2026-10-21.md`; method:
+`references/technical-patterns.md` → "Finding new event sources per city".
+
+When scraping a city, work through **all** its rows, biggest first:
+1. **Kommun lov pages** (höstlov/jullov/sportlov/påsklov/sommarlov) — biggest family-event source; the URL often
+   carries the year, so re-find it before every school holiday.
+2. City-wide kommun calendar with the family filter (e.g. `start.stockholm/aktuellt/?t=event&c=279&c=885&c=760`,
+   `kalender.sigtuna.se/events?by_categories=2780`), then KUBIK Uppsala / Visit Roslagen barn-familj / Barnistan
+   area pages.
+3. Museum, kulturhus, teater and kulturskola calendars (family filter URLs), then bibliotek, kyrka, ticketing.
+4. Places rows (lekplatser, badplatser, Naturkartan, utflyktsmål) feed the permanent-places workflow above.
 
 ## Technical Patterns
 

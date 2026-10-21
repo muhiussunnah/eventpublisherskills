@@ -472,6 +472,21 @@ Never use synthetic paste events (crash Sheets) or `navigator.clipboard.writeTex
    and, if it is not empty, select `A<n>:E` and `Delete`. G23 and I292 must equal the API count.
 9. The Events tab lists only **published** live events (`place.isPublished === true`); hidden events on unpublished
    holding venues are left out.
+10. **Name Box `Return` can leak into the grid** (2026-10-21): after jumping to A360 the cell went into edit mode and
+    the next arrow key committed `"\n\n"` over the URL. Always press **`Escape` right after every Name Box `Return`**
+    (harmless when nothing is being edited), and verify bulk writes row-by-row (point 14), not only by totals.
+11. The Name Box does **not** take multi-ranges (`B2,B19`) → modal "The name given to this range is invalid"; while it
+    is open the following clicks are swallowed and keystrokes hit the old selection (ctrl+b bolded all of B2:B372).
+    Do formatting one range at a time and screenshot after the first one.
+12. `ctrl+shift+v` keeps the **destination's formatting** — old bold/fill stays at the old row positions and lands on
+    other rows when the list grows/shifts. After a re-ordered paste: select the column, `ctrl+b` (toggles by the
+    active cell; check it went all-off), re-bold the right cells; look for stray fills on rows that used to be empty.
+13. Toolbar fill colour (paint bucket) ≈ (770, 75); palette "light green 3" ≈ (856, 179), "Reset" ≈ (817, 113).
+14. **Read the sheet back exactly:** from any `docs.google.com` tab,
+    `fetch('https://docs.google.com/spreadsheets/d/<id>/gviz/tq?tqx=out:csv&gid=0&range=A1:E400&_='+Date.now())`
+    gives CSV with computed formula values (same origin, no download). Parse quoted CSV (cells can hold newlines),
+    hash each row (djb2 of `A|B|C`) and compare with the same hashes computed in Python from the source TSV — return
+    only mismatching row numbers (avoids the output filter on URLs with `?&=`).
 Reading bulk data out of the browser: render it in a `<pre>` and use `get_page_text` (≤ 50 000 chars per call) instead of many small `javascript_tool` returns.
 
 ## Image quality sweep of all live events (learned 2026-10-19)
@@ -529,6 +544,34 @@ Reading bulk data out of the browser: render it in a `<pre>` and use `get_page_t
 - The Ticketmaster scan calls `GET /admin/events/{id}` ~1500 times: run ONE job only, batches of 6 with a 250 ms pause
   and retry on HTTP 429 ("Too many requests") — two parallel scans got rate-limited and silently dropped events
   (30 vs 31 found). Track failures and only report when `fail = 0`.
+
+## Finding new event sources per city (learned 2026-10-21)
+Task: "city-wise research the best sources we are missing + put the total per city next to them" (Events_Update tab).
+1. **Read the existing list** from the sheet (gviz CSV) → `existing.json` city → [urls] in sheet order.
+2. **Split the 27 cities into 5 groups** (Stockholm/Solna/Sundbyberg/Lidingö/Danderyd · Nacka/Värmdö/Tyresö/Haninge/
+   Nynäshamn/Vaxholm · Huddinge/Botkyrka/Salem/Södertälje/Nykvarn/Ekerö · Järfälla/Sollentuna/Upplands Väsby/
+   Upplands-Bro/Sigtuna · Täby/Vallentuna/Österåker/Norrtälje/Uppsala) and run one research subagent per group with a
+   shared brief: rank by "lists many upcoming family events", unique (not a copy of the kommun calendar), official
+   beats aggregator, filtered city URL beats home page, also mark permanent-place lists; **fetch every URL** and reject
+   dead/empty/outdated/login/adult-only; Facebook only if nothing better. Output JSON per source: city, url, name, type,
+   gives (events|places|both), familyEvents, upcomingCount, example (real upcoming items), note, verified date.
+3. **Combine** (`src_combine.py`): normalise URLs (lowercase, drop scheme/`www.`/`#fragment`/trailing `/`), drop
+   duplicates vs existing and within the new list, drop existing URLs found dead, keep existing rows first then new
+   ones per city, add `=COUNTIF(B$2:B;B<row>)` on each city's first row, write TSV + list of new-row ranges.
+4. **Paste** with the bulk-write recipe (Sheets notes above), verify row-by-row by hash, then format: bold first row
+   of each city, light-green fill on new rows, clear stray fills. Save the report `SOURCES-RESEARCH-…-<date>.md`.
+What the 2026-10-21 run found (reuse next time):
+- Biggest wins are **kommun lov pages** (Södertälje Kulturlovet 61, Botkyrka Lov 59, Stockholm höstlov category 350+).
+- `start.stockholm/aktuellt/?t=event` categories: `c=279` Barn och familj, `c=885` Parklek, `c=760` Kulturskolan,
+  `c=362` Höstlov (also Jullov/Sportlov/Påsklov); paging `&sida=N` (9 per page), `di=<stadsdel>`, `ym=YYYYMM`.
+- `kalender.sigtuna.se/events?by_categories=2780` (Barn och familj), `2779` (Lovaktivitet) — `sigtuna.se/evenemang.html`
+  only shows ~9 teasers.
+- Uppsala: KUBIK (230), Biotopia, UKK familj, uu.se `eventsType=familjeaktivitet`. Roslagen: `roslagen.se/evenemang-2/
+  kategori/barn-familj/` (60). Huddinge `huddinge.se/kommunkalender` (152). Teater Bristol (Sundbyberg, 82 shows).
+- Dead/blocked: allevents.in (403 Cloudflare), Kidsinfo (domain dead), hembygd.se (Cloudflare), Westfield Täby/Nacka
+  Forum (0 events), Reginateatern (closed autumn 2026), tomtit.se (unreachable from our network — keep, flag).
+  Lidingö's old `…evenemangskalender.4.56084d…html` is 404 and Vallentuna's old `/evenemang-och-upplevelser/…`
+  redirects — both replaced.
 
 ## Sponsored posts API
 `GET /admin/sponsored?page=1&limit=100&isEnd=false|true` → `data.sponsored[]` {sponsoredId, title, image, startDate, endDate, owner, municipality}, `data.totalSponsored`. `isEnd=false` = active (same split the dashboard shows). Detail: `GET /admin/sponsored/{id}`; create/edit/delete: POST / PATCH / DELETE `/admin/sponsored[/{id}]` (image upload prefix `sponsored.jpg-<ts>`).

@@ -18,6 +18,26 @@ Entry template:
 
 ---
 
+## 2026-10-21 — City-wise source research (CEO: "we are missing big sources")
+**User asked:** research city by city the best event sources we are missing (temporary events + permanent places,
+unique, top class), add them to the Events_Update tab and fill in each city's total number of sources.
+**Result:** 5 parallel research agents (27 cities), every URL fetched and checked for upcoming family items →
+**197 new sources**, 2 dead ones removed → **371 sources** (was 176). Column C = per-city total (COUNTIF on each
+city's first row): Stockholm 36, Uppsala 23, Södertälje 20, Sigtuna 19, Huddinge 18 … Danderyd 6. New rows are light
+green. Report + CEO answer: `SOURCES-RESEARCH-STOCKHOLM-UPPSALA-2026-10-21.md`.
+**What I learned:** kommun **lov pages** are the biggest family-event sources (re-find them every holiday); Stockholm
+stad's `start.stockholm` calendar has category filters; Sigtuna's real calendar is `kalender.sigtuna.se`; Lidingö and
+Vallentuna calendar URLs had moved. Method and URLs: technical-patterns.md "Finding new event sources per city".
+**Mistakes + fixes:** after a Name Box jump the `Return` leaked into the grid and wrote `"\n\n"` over A360 → found by a
+row-by-row hash check of the gviz CSV against the source TSV, fixed the cell, and from then on pressed `Escape` after
+every Name Box jump. A multi-range Name Box entry (`B2,B19`) opened an "invalid range" modal and the next ctrl+b
+presses bolded all of column B → closed it, un-bolded, re-bolded the 27 first-of-city cells one by one. The paste kept
+old formatting at old positions → also cleared stray yellow fill (rows 209–302) left on rows that were empty before.
+**Files updated:** SKILL.md (v1.46.0, new "Event Sources per City" section), technical-patterns.md (Sheets notes
+10–14, "Finding new event sources per city"), this log, new report.
+**Open follow-ups:** before jullov/sportlov re-check the lov URLs (year in the slug); tomtit.se unverified from our
+network; Ticketmaster tab F2 still counts the 2 hidden adult shows (35 vs 33) — waiting for the user's answer.
+
 ## 2026-10-20 — Events tab refresh + client report
 **User asked:** update the Events tab with every live event, matched with the dashboard; (and the pending client report).
 **Result:** 1430 published live events (1277 recurring, 153 one time; 1313 ongoing, 117 upcoming) — dashboard shows 1460
