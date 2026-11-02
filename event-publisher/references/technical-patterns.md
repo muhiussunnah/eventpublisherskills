@@ -541,6 +541,11 @@ Reading bulk data out of the browser: render it in a `<pre>` and use `get_page_t
   F2 `=COUNTIF(G2:G;">="&TODAY())` (Total Ticketmaster Live) · G Last Date (ISO, from the event's `dates[]`).
   New row = fill A–E + G; copy the format of the row above with Paint format. Expired rows: light red 1 background on A:E (+G).
 - **Universal content/article** = `GET /admin/contents` → count `isPublished: true` (also report the total).
+- **Cross-check:** published live must equal the dashboard card "Published Events" (`/dashboard`). Region split = place
+  municipality → region via `/admin/municipalities`. The Ticketmaster count also includes sheet rows without a
+  Ticketmaster link (Trollkarlen från Oz). Leave G empty on hidden rows so F2 skips them (date stays in D).
+- **Events tab goes stale in one more way:** recurring places leave the live list when `recurrence.endDate` passes, but
+  the tab's formulas only drop one-time rows → always re-paste A2:E each week; G23 and I292 must equal the API count.
 - The Ticketmaster scan calls `GET /admin/events/{id}` ~1500 times: run ONE job only, batches of 6 with a 250 ms pause
   and retry on HTTP 429 ("Too many requests") — two parallel scans got rate-limited and silently dropped events
   (30 vs 31 found). Track failures and only report when `fail = 0`.

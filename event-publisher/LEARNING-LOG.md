@@ -18,6 +18,23 @@ Entry template:
 
 ---
 
+## 2026-11-02 — Monday report (region-wise) + sheet refresh
+**User asked:** region-wise report for the boss (events live, total Ticketmaster, articles, sponsored videos) and update
+the Sponsored, Events and Ticketmaster tabs.
+**Result:** Events 1,397 (matches the dashboard card "Published Events"), Ticketmaster 27, Articles 857/952, Sponsored
+2 (both video). Report: `MONDAY-REPORT-2026-11-02.md`; boss page = private artifact "Famies Monday Report".
+**What I learned:** 1) Recurring places also leave the live list when `recurrence.endDate` passes, so the Events tab
+formula (which only drops one-time rows) can run high: the tab said 1400 vs 1397 live. Always refresh the rows.
+2) The Name Box fix (`Escape` after `Return`) still worked; `F2`, `Home`, type letter fixes a first letter that was
+dropped by typing (Ä/Ö, same as the emoji note). 3) The Ticketmaster list has one row without a Ticketmaster link
+(Trollkarlen från Oz → Intiman): live count = scan + that row. 4) A hidden show with a future G date inflates F2, so
+leave G empty on hidden rows (date stays in D).
+**Mistakes + fixes:** Sponsored rows 30 and 47 had lost Ä/Ö since the 2026-10-14 typing → fixed, hash now equals the API.
+**Found, not touched:** Events_Update tab has been removed from the sheet (not hidden) → Sources_Sweden G:I Stockholm,
+Uppsala and Total show errors; asked the user. My local copy of its rows is gone, so version history is the way back.
+**Open follow-ups:** next-season dates for Bollnäs museum, Järvsö Bergscykelpark, Björköby djurpark; venue of the Babblarna
+Estrad Södertälje event (Kulturskolan, Tyresö).
+
 ## 2026-10-21 — Source research for ALL of Sweden (21 regions, 290 kommuner)
 **User asked:** do the same source research region by region, city by city for the other 20 regions (290 kommuner
 in total, Stockholm was only the first).
