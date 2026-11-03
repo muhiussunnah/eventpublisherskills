@@ -440,6 +440,14 @@ Upload separately for place and event (do not share one S3 URL — deleting an i
   foundations/associations → their legal name ("Stiftelsen …", "Föreningen …", "… hembygdsförening").
 - Small associations often publish only named people's mobiles → leave phone null (privacy rule); no logo → avatar null.
 
+### Värmland + Halland run (2026-11-03) — tools and lessons
+- Tools: `tools/permanent-places/` (extract → brief → show/imgprep/chaindup review → build_specs checks → helpers.js queue).
+- Spec transfer: PowerShell `Clipboard::SetText(specs.json)` → focused `<textarea>` → `ctrl+v` → `JSON.parse` → restore clipboard.
+- Recurrence: if the common window over all days is < ~3 h, use the days that share a real window (Mon–Fri 14–18) instead.
+- Chain photos: dHash against existing chain events (`chain_urls.txt`); reject distance ≤ 10.
+- Logos: always view; white logo → `bg=1d3557`; drop a logo that shows another organisation's name.
+- `isFree: true` only with an official "fri entré/gratis" text; otherwise false and flag it.
+
 ### Finding which places are still unpublished in a new HTML
 1. Extract `const EMBEDDED = {...}` → `places[]` (country Sverige), group by `region` / `municipality`.
 2. Count app places per municipality (`/admin/places` pages, `place.municipality.name`).

@@ -18,6 +18,24 @@ Entry template:
 
 ---
 
+## 2026-11-03 — Värmland + Halland permanent places (new client HTML `_1`, 1201 places)
+**User asked:** publish the permanent places of Värmland and Halland from the new client file, with all earlier rules.
+**Result:** 121 places → 8 already in the app → 113 researched (14 subagents) → **88 published** (Värmland 54, Halland 34),
+25 skipped (booking-only/no drop-in, performance-only theatres, closed or no hours, adult/spa, no real photo, merged).
+Audit 0 issues; 0 duplicate titles or images; Events tab 1484 (Värmland 59, Halland 37).
+Report: `VARMLAND-HALLAND-PERMANENT-PLACES-FINAL-REPORT-2026-11-03.md`. Tools saved in `tools/permanent-places/`.
+**What I learned:**
+- The scratchpad was wiped (only 14 files left) → keep the working tools in the repo (`tools/permanent-places/`).
+- Moving large spec JSON into the page: clipboard → focused textarea → `ctrl+v` → parse (no huge tool-call payloads).
+- A recurrence window that is "open on every listed day" can be uselessly short (14–15). Pick the subset of days that gives a
+  real window instead (e.g. Mon–Fri 14–18) — the venue keeps the full per-day hours.
+- Check chain photos (Leo's, JumpYard, O'Learys, Yoump) against the chain events already in the app with dHash — two
+  candidates were exact copies of existing app images.
+- Look at every logo: one "Hallands Konstmuseum" logo file showed another museum's name; white logos need a dark bg.
+- `isFree` only when an official page says free (agents sometimes assumed it for castles/beaches/reserves).
+- wsrv sometimes returns 403 to a plain Python request; send a browser User-Agent.
+**Open follow-ups:** see the report (20 seasons copied, 6 events ending soon, 4 places only need photos).
+
 ## 2026-11-02 — Monday report (region-wise) + sheet refresh
 **User asked:** region-wise report for the boss (events live, total Ticketmaster, articles, sponsored videos) and update
 the Sponsored, Events and Ticketmaster tabs.

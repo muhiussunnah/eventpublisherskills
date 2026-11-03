@@ -1,7 +1,7 @@
 ---
 name: event-publisher
-skill_version: "1.48.0"
-last_updated: "2026-11-02"
+skill_version: "1.49.0"
+last_updated: "2026-11-03"
 rule_count: 24
 rules_file: references/event-rules.md
 learning_log: LEARNING-LOG.md
@@ -157,7 +157,7 @@ Used when the user gives a list of **permanent family places** (e.g. the "Vad sk
 embedded `places`, filtered by `region`) instead of a dated event calendar. Full API details:
 `references/technical-patterns.md` → "Permanent Places Publishing". Runs: Gävleborg 2026-10-13
 (`GAVLEBORG-PERMANENT-PLACES-FINAL-REPORT-2026-10-13.md`, 52 published), Södermanland 2026-10-18
-(`SODERMANLAND-PERMANENT-PLACES-FINAL-REPORT-2026-10-18.md`, 40 published).
+(`SODERMANLAND-PERMANENT-PLACES-FINAL-REPORT-2026-10-18.md`, 40 published), Värmland + Halland 2026-11-03 (`VARMLAND-HALLAND-PERMANENT-PLACES-FINAL-REPORT-2026-11-03.md`, 88 published). Working tools: `tools/permanent-places/`.
 
 0. **New HTML version?** Find what is unpublished: compare places per region/kommun in the HTML with the app's place
    counts; only the regions (and stray places) that are missing get researched.
