@@ -1,6 +1,6 @@
 ---
 name: event-publisher
-skill_version: "1.50.0"
+skill_version: "1.51.0"
 last_updated: "2026-11-05"
 rule_count: 24
 rules_file: references/event-rules.md
@@ -193,6 +193,8 @@ embedded `places`, filtered by `region`) instead of a dated event calendar. Full
    agents with `brief_verify.md` → aggregate.py → report.py). First full audit 2026-11-05 after Örebro läns museum
    complained: `PERMANENT-PLACES-ACCURACY-AUDIT-2026-11-05.md` (1,365 places: 455 correct, 797 need fixes,
    113 unpublish; Aug–Sep batch only 24% correct). Fix list: `audits/permanent-places-2026-11-05.csv`.
+   Fixes applied the same day: `PERMANENT-PLACES-FIXES-2026-11-05.md` (273 hidden reversibly, 638 corrected, 6 events
+   moved to their own venue, 13 addresses fixed; 1484 → 1212 published live events).
 
 ## Event Sources per City (Events_Update tab) — NEW 2026-10-21
 

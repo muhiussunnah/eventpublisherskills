@@ -635,3 +635,20 @@ Tools: `tools/permanent-places/audit/` (set the `AUD` path at the top of each sc
 Remediation rules: closed/booking-only → unpublish the venue (`isPublished:false`) or move the event to a
 `[Dold]` holding venue (see "Unpublishing events"); seasonal → set recurrence `startDate/endDate` to the official
 season; hours → one window open on every listed day; never hard-delete.
+
+### Applying the audit fixes (learned 2026-11-05)
+1. Fix agents (`brief_fix.md`) return per event: `decision` patch/hide/no_change, `hours_by_day`, `season`, one
+   `recurrence`, `isFree`, optional `description`/`title`/`ctaLink`. `validate_fix.py` rejects any window that is not
+   inside `hours_by_day` on every listed day, past dates, dates outside the season, descriptions outside 280–700.
+2. Hiding: venue with no other live AND no ended events → `PATCH /admin/places/{id}` full body + `isPublished:false`;
+   otherwise create/reuse `[Dold] <venue> – ej aktuell` (POST /admin/places from the original body, `isPublished:false`)
+   and PATCH the event `placeId`. Verify every hidden event returns `place.isPublished === false`.
+3. Fixing: GET event → `__evBody(ev, overrides)` (placeId, title, description, images, lat, lng, address, isFree, ages,
+   ctaLink, ctaText, interestIds, isRecurring+recurrence) → PATCH → re-GET and compare every sent field. When the
+   description is rewritten and the venue has only this event and a ≥ 60 % similar description, PATCH the venue
+   description too.
+4. Wrong venue: POST a new venue at the real address (org/interest from the old venue, images from the event,
+   municipalityId from `/admin/municipalities`), or reuse an existing venue with the same title, then PATCH the event
+   `placeId, lat, lng, address, ctaLink`.
+5. Address fixes: geocode with Nominatim (`format=json&countrycodes=se&q=<address>`, own User-Agent, 1 req/s); only
+   move the pin when the match is a house number or the named POI.
