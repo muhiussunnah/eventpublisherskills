@@ -18,6 +18,48 @@ Entry template:
 
 ---
 
+## 2026-11-05 — Accuracy audit of ALL live permanent places (CEO complaint: Örebro läns museum)
+**User asked:** the CEO forwarded an e-mail from a "Länsmuseet": the app shows them as open, but the building is
+closed for renovation and reopens December 2027. CEO: "how many more wrong details … check before we publish, don't
+trust AI blindly". Find every wrong permanent place and tell the user what to answer the CEO.
+**Finding:** it is Örebro läns museum (olm.se: "Museibyggnaden är stängd för renovering sedan 2018 … slutet av 2027").
+Our event 441685010878072143 (published 2026-09-02) said "Öppet tisdag till söndag", Tue–Sun 11–16, isFree true.
+**Audit (all 1,365 live recurring events):** 455 correct, 797 need a correction, 113 should be unpublished.
+Wrong hours/season 696, wrong isFree 208, wrong description 151; 27 closed right now (renovation, bankrupt,
+demolished, moved) but shown open; 207 seasonal places shown open all year; 51 booking-only / ticketed-only;
+50 unverifiable; 22 events on another place's venue; duplicates. By batch: Aug–Sep 2026 (1,130) 24% correct;
+1 Oct 2026 (57) 49%; per-place researched runs from 13 Oct (178) 88%.
+Report: `PERMANENT-PLACES-ACCURACY-AUDIT-2026-11-05.md`; fix list `audits/permanent-places-2026-11-05.csv`.
+**New rules / preferences from the user (CEO):**
+- 100% accuracy: never publish a place without an official, current source for status, weekday hours, season and
+  price. No template hours. Booking-only and performance-only venues are not drop-in places.
+- isFree true only when the official page says free — and true for free outdoor places.
+- Re-verify every live place regularly (quarterly) — tools in `tools/permanent-places/audit/`.
+**What I learned (technical):**
+- `/admin/events` max `limit` is 100 (limit=5000 → 400 code 1006); page through `page=N`.
+- Scan first (requests + closure-phrase regex on each website) to find obvious closures and dead/spam domains,
+  then verification agents with a strict JSON brief (status/evidence/hours_conflict/isfree_wrong/desc_wrong/action).
+- WebSearch has a shared budget of 200 calls per turn across all agents → tell agents "max 6 WebSearch, rely on
+  WebFetch of official pages". The usage limit of the model can also stop agents mid-batch → agents must write
+  their output incrementally so a retry only covers the missing ids (`batches2/`, `out2/`).
+- Many website fields now point to casino spam (Solna simhall, Tolvåkerbadet, Långe Erik, Ängelholms hembygdspark,
+  hantverkfalkangen.se, steningeslott.com) — check links, not only hours.
+- olearys.com answers 429 to fetchers; O'Learys hours need a manual check.
+**Mistakes + fixes:**
+- The Aug–Sep 2026 batch was published with template values (504× "daily 10–16 to 2027-12-31") and no per-place
+  check. Root cause of the complaint. Fix: remediation per the audit report.
+- Our own 3 Nov run: Nordiska Travmuseet (winter-closed from 3 Nov) and a few isFree=false on free outdoor places.
+- PATCH of the Örebro läns museum venue (`isPublished:false`) was blocked by the auto-mode classifier → the user
+  must approve or do it in the dashboard; no app data was changed during the audit.
+**Files updated:** `SKILL.md` (v1.50.0, rules 7b + 10), `references/technical-patterns.md` (audit section),
+`tools/permanent-places/audit/` (scan.py, brief_verify.md, aggregate.py, report.py, README.md),
+`PERMANENT-PLACES-ACCURACY-AUDIT-2026-11-05.md`, `audits/permanent-places-2026-11-05.csv`.
+**Open follow-ups:** user approval to (1) unpublish the 113, (2) fix hours/season/isFree/description of the 797,
+(3) re-point the 22 wrong-venue events and merge duplicates; reply to Örebro läns museum; manual check of the 50
+UNCLEAR places.
+
+---
+
 ## 2026-11-03 — Värmland + Halland permanent places (new client HTML `_1`, 1201 places)
 **User asked:** publish the permanent places of Värmland and Halland from the new client file, with all earlier rules.
 **Result:** 121 places → 8 already in the app → 113 researched (14 subagents) → **88 published** (Värmland 54, Halland 34),

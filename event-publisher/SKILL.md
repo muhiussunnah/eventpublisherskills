@@ -1,7 +1,7 @@
 ---
 name: event-publisher
-skill_version: "1.49.0"
-last_updated: "2026-11-03"
+skill_version: "1.50.0"
+last_updated: "2026-11-05"
 rule_count: 24
 rules_file: references/event-rules.md
 learning_log: LEARNING-LOG.md
@@ -178,11 +178,21 @@ embedded `places`, filtered by `region`) instead of a dated event calendar. Full
 6. **Recurrence rule** — pick ONE time window that is genuinely open on every listed day (e.g. weekends close
    earlier → use the shorter window). Always-open outdoor places: 00:00 + 1439 min. Season over and next season
    not announced → copy the previous season's calendar span into next year and flag it in the report.
-7. **Skip** when: closed to the public, no fixed hours AND no real visit option, no official source, or no real
-   image of the place. Report every skip with the reason.
+7. **Skip** when: closed to the public (renovation, season, demolished, bankrupt), no fixed hours AND no real
+   visit option (booking-only, ticketed performances only), no official source, or no real image of the place.
+   Report every skip with the reason.
+7b. **Official source for every fact (CEO rule 2026-11-05)** — before publishing, the official page (own site or
+   kommun page, dated this year) must confirm: open now / closed for renovation / season, the hours for EACH
+   weekday in the published window, the season span, and the price. Never use template hours ("daily 10–16").
+   `isFree: true` only if the page says free; free outdoor places (parks, reserves, beaches, monuments) get
+   `isFree: true`. Check that the website link is not a dead domain or casino spam.
 8. **Privacy** — only generic/business contacts. Never personal-name emails or private individuals' phones.
 9. **Audit after publishing** — re-fetch all events of the region: no duplicate titles/images, municipality set,
    ages, recurrence, CTA, interests; visual contact-sheet check of every event image and avatar.
+10. **Quarterly re-verification of ALL live places** — `tools/permanent-places/audit/` (scan.py → verification
+   agents with `brief_verify.md` → aggregate.py → report.py). First full audit 2026-11-05 after Örebro läns museum
+   complained: `PERMANENT-PLACES-ACCURACY-AUDIT-2026-11-05.md` (1,365 places: 455 correct, 797 need fixes,
+   113 unpublish; Aug–Sep batch only 24% correct). Fix list: `audits/permanent-places-2026-11-05.csv`.
 
 ## Event Sources per City (Events_Update tab) — NEW 2026-10-21
 

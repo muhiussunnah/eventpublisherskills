@@ -609,3 +609,29 @@ What the 2026-10-21 run found (reuse next time):
 
 ## Sponsored posts API
 `GET /admin/sponsored?page=1&limit=100&isEnd=false|true` → `data.sponsored[]` {sponsoredId, title, image, startDate, endDate, owner, municipality}, `data.totalSponsored`. `isEnd=false` = active (same split the dashboard shows). Detail: `GET /admin/sponsored/{id}`; create/edit/delete: POST / PATCH / DELETE `/admin/sponsored[/{id}]` (image upload prefix `sponsored.jpg-<ts>`).
+
+## Accuracy audit of all live permanent places (learned 2026-11-05)
+Tools: `tools/permanent-places/audit/` (set the `AUD` path at the top of each script to the current scratchpad).
+1. **Pull**: in the dashboard tab, page `GET /admin/events?isEnd=false&limit=100&page=N` (limit > 100 → 400 code
+   1006), keep `isRecurring`, then `GET /admin/events/{id}` for each (6 parallel workers, retry 429/empty with
+   backoff, 2nd pass for failures). Export via a focused `<textarea>` + ctrl+c → PowerShell clipboard → `det.json`
+   (strip the UTF-8 BOM; back up and restore the user's clipboard).
+2. **Scan**: `scan.py` fetches each website/ctaLink (browser UA, 16 threads) and greps closure phrases
+   (stängt för renovering, tills vidare, öppnar igen 2027, konkurs, har flyttat …) → `scan.json`. Many hits are
+   false positives (holiday closures, kommun news banners such as Örebro's Trängkårsvägen/Södercity), so it only
+   prioritises; it is not the verdict.
+3. **Verify**: batches of ~28 places (`batches/b_NN.json`, sorted by kommun) → one agent each with
+   `brief_verify.md`; output keys `id, place, status, evidence_url, evidence_quote, reopen, hours_conflict,
+   official_hours, desc_wrong, isfree_wrong, action, confidence, note`. Agents write every 3 items so a stopped
+   agent can be resumed for the missing ids only.
+   - WebSearch budget is 200 calls per turn shared by all agents → cap each agent at 6 (12 when only 7 run).
+   - O'Learys (olearys.com 429), hembygd.se (403), malmo.se (refuses), JS-only sites → mark UNCLEAR/medium.
+4. **Extra checks** in Python on `det.json`: duplicate place titles per kommun, several recurring events on one
+   placeId (chains attached to one location's venue), event title sharing no word with the venue title (event on
+   the wrong venue / venue named after an operator or kommun).
+5. **Aggregate + report**: `aggregate.py` → `audit_results.json`; `report.py` → markdown report with sections
+   A closed-now, B unpublish, C seasonal, D wrong hours, E isFree, F description, G wrong venue, H operator-named
+   venue, I duplicates, J unclear; contacts in quotes are scrubbed ([tel]/[e-post]/[namn]) before committing.
+Remediation rules: closed/booking-only → unpublish the venue (`isPublished:false`) or move the event to a
+`[Dold]` holding venue (see "Unpublishing events"); seasonal → set recurrence `startDate/endDate` to the official
+season; hours → one window open on every listed day; never hard-delete.

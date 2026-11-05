@@ -18,3 +18,5 @@ path at the top: point it at the current session's scratchpad folder before runn
 
 Getting big spec files into the page without pasting them into a tool call: PowerShell `Clipboard::SetText(file)` →
 JS creates a focused `<textarea>` → `ctrl+v` → `JSON.parse(textarea.value)` → restore the user's clipboard.
+
+`audit/` — quarterly accuracy audit of all live places (scan → verification agents → report). See `audit/README.md`.
