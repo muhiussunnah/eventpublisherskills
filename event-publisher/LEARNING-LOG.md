@@ -18,6 +18,30 @@ Entry template:
 
 ---
 
+## 2026-11-10 (part 2) — Weekly report region/city-wise + sheet cleanup (user: "expired dorkar nai rakhar file e")
+**User asked:** region-by-region and city-by-city update (events live, Ticketmaster, sponsored videos, articles), update
+the sheet and remove everything expired from it, and say how many regions are done / left.
+**Result:** Events live 1,258 (1,144 permanent + 114 one-time; 1,177 ongoing + 81 upcoming; = dashboard card),
+Ticketmaster 26 (25 links + Trollkarlen från Oz), Sponsored video 1 (Swedish House Maffia to 31 Dec), Articles 857/952,
+248 of 290 kommuner have events. Permanent places: 16 of 21 regions done; Norrbotten, Västerbotten, Västernorrland,
+Jämtland, Gotland wait for client research. Report: `WEEKLY-REPORT-2026-11-10.md`.
+**New rules / preferences from the user:**
+- Expired rows are **deleted** from the sheet now (no more red marking): Ticketmaster tab keeps only live rows,
+  Sponsored tab keeps only active posts. Events tab = live list only (as before).
+**What I learned (technical):**
+- Read a whole sheet tab: open `…/gviz/tq?tqx=out:html&headers=1&gid=<gid>&range=A1:J200` in a new tab and use
+  `get_page_text` (the edit page has no `<main>`, javascript output is truncated).
+- Delete sheet rows: Name Box `A25:G27` → right-click inside the selection → "Delete rows 25 - 27" (menu item at about
+  y=267 when the menu opens at the top, y=322 for later calls); delete blocks bottom-up so row numbers stay valid.
+- Sponsored tab: D = `=IF(C2>NOW();"Active";"Expired")`, F2 `=COUNTIF(C2:C87;">"&NOW())`, F4 `<=`, F6 `=COUNTA(B2:B87)`
+  in rows 2–6 → never delete rows there (the summary would go); clear A3:D87 values and write the active rows at the top.
+- Typing `	` in a `type` action does NOT move to the next cell in Sheets (both values landed in B2) → write each cell
+  via its own Name Box jump.
+- App kommun names with typos: "Vaggaryd", "Robertfors", "Lilla edet".
+**Files updated:** `references/technical-patterns.md` (weekly report notes), this log, the report.
+
+---
+
 ## 2026-11-10 — Audit leftovers fixed + Kronoberg & Blekinge permanent places (user: "ok fix koro … Kronoberg ar Blekinge")
 **User asked:** fix the three leftovers from the 2026-11-05 audit (parentMaxAge 18 → 100, re-check the 46 events
 ending before April 2027, refresh the sheet's Events tab), then publish the two new regions from the client file

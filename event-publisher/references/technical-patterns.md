@@ -547,7 +547,7 @@ Reading bulk data out of the browser: render it in a `<pre>` and use `get_page_t
   undercounts by half). Cross-check with the sheet's Ticketmaster tab; mark rows whose ID is no longer live in red.
 - **Ticketmaster tab layout** (gid 857559120): A Event Title · B Edited Link · C Source URL · D Date (free text) · E City ·
   F2 `=COUNTIF(G2:G;">="&TODAY())` (Total Ticketmaster Live) · G Last Date (ISO, from the event's `dates[]`).
-  New row = fill A–E + G; copy the format of the row above with Paint format. Expired rows: light red 1 background on A:E (+G).
+  New row = fill A–E + G; copy the format of the row above with Paint format. Expired rows: **delete them** (user, 2026-11-10 — before that they were marked light red).
 - **Universal content/article** = `GET /admin/contents` → count `isPublished: true` (also report the total).
 - **Cross-check:** published live must equal the dashboard card "Published Events" (`/dashboard`). Region split = place
   municipality → region via `/admin/municipalities`. The Ticketmaster count also includes sheet rows without a
@@ -672,3 +672,13 @@ season; hours → one window open on every listed day; never hard-delete.
   password needed). Ask the user only if the reload lands on a Google sign-in page.
 - Region check: `/admin/municipalities` items carry `region.name`; Kronoberg = Växjö, Alvesta, Älmhult, Ljungby,
   Markaryd, Lessebo, Uppvidinge, Tingsryd; Blekinge = Karlskrona, Ronneby, Karlshamn, Sölvesborg, Olofström.
+
+### Weekly report + sheet cleanup (learned 2026-11-10)
+- Since 2026-11-10 the sheet keeps **only live data**: delete ended Ticketmaster rows (Name Box `A<r1>:G<r2>` →
+  right-click → "Delete rows"), bottom block first; in the Sponsored tab clear `A3:D87` and keep the active posts at
+  the top, because the summary formulas live in F2:F6 (`COUNTIF(C2:C87;…)`, `COUNTA(B2:B87)`).
+- Read a tab completely: open `gviz/tq?tqx=out:html&headers=1&gid=<gid>&range=…` in a new tab → `get_page_text`.
+- Ticketmaster check: scan all published live events (`GET /admin/events/{id}`, 6 workers, 250 ms, retry 429) for
+  `ticketmaster` in ctaLink/description, then compare IDs and last dates with the tab (plus the Trollkarlen från Oz row).
+- Region/city tables: `/admin/municipalities` gives `region.name`; city sums must equal region totals and the
+  dashboard card before reporting.
