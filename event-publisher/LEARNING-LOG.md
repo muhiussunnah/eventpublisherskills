@@ -18,6 +18,35 @@ Entry template:
 
 ---
 
+## 2026-11-10 — Audit leftovers fixed + Kronoberg & Blekinge permanent places (user: "ok fix koro … Kronoberg ar Blekinge")
+**User asked:** fix the three leftovers from the 2026-11-05 audit (parentMaxAge 18 → 100, re-check the 46 events
+ending before April 2027, refresh the sheet's Events tab), then publish the two new regions from the client file
+`Famies - Vad ska vi hitta pa idag_2.html`.
+**Result:** parentMaxAge: 83 events fixed (1,205 checked, 0 errors). 46 short spans re-checked: Norrvikens trädgårdar,
+Trelleborgs Sjöfartsmuseum and Naturum Fjärås Bräcka extended, Hovfjället start date fixed, Älvkarleby Sportfiske not
+extended (only a 2024 page). Kronoberg + Blekinge: 79 places → 5 already in the app → 74 researched (11 agents) →
+**53 published** (Kronoberg 30, Blekinge 23), 21 skipped (escape rooms, theatres, booking-only bowling/dressin,
+no official current hours). Audit 53/53 field-by-field OK, 0 duplicate titles/images. Published live 1205 → 1258.
+Events tab refreshed once at the end: 1258 rows, G23 = I292 = 1258, sheet hash = dashboard list.
+Report: `KRONOBERG-BLEKINGE-PERMANENT-PLACES-FINAL-REPORT-2026-11-10.md`.
+**New rules / preferences:** same strict rules as 2026-11-05 (official current source per fact). An official site that
+is offline is a skip, not a reason to use third-party listings.
+**What I learned (technical):**
+- Spec transfer without the clipboard: `compact.py` → ~21 KB template-literal chunks → checksum per chunk and of the
+  expanded specs (byte-identical). A localhost server failed (Chrome Local Network Access left the fetch pending).
+- The SHA-256 duplicate-image guard caught one operator photo shared between two places (Blekingetrafiken boats).
+- Wayback-only research (bot-blocked kommun sites) → check the live page in the user's Chrome before publishing.
+- Organizer of a place = `owner` in the place detail.
+**Mistakes + fixes:** built the specs before accepting two places → they were missing from the batch; caught when
+writing the ID list, rebuilt and published them (53 total). Sheets tab had signed out while idle → a reload fixed it.
+**Files updated:** `SKILL.md` (v1.52.0), `references/technical-patterns.md` (Kronoberg + Blekinge lessons),
+`tools/permanent-places/` (`brief_pp.md` strict version, `build_specs.py`, new `compact.py`, `transfer_audit.js`,
+README), this log, the final report.
+**Open follow-ups:** 19 seasons copied from 2026 into 2027; Blekinge museum (site offline), Karlskrona simhall and
+O'Learys Växjö need a manual hours check; Växjö Minigolf re-check April 2027; Klättercentret Solna closes 19 Dec 2026.
+
+---
+
 ## 2026-11-05 (part 2) — All audit fixes applied (user: "sob approve korlam sob fix koro")
 **User asked:** apply every fix from the accuracy audit; no reply to Örebro läns museum needed.
 **Result:** 273 events hidden reversibly (174 first pass: audit verdicts + duplicate copies; 99 second pass: places

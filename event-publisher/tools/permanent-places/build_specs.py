@@ -1,11 +1,11 @@
 import json, sys, os, re, urllib.parse
 
-PP = 'C:/Users/User/AppData/Local/Temp/claude/F--eventpublisherskills/4ad7473a-f7bd-4184-b47a-6ef00f11c16a/scratchpad/pp/'
-TODAY = '2026-11-03'
+PP = '<scratchpad>/pp/'  # point at the current session's scratchpad folder
+TODAY = '2026-11-10'
 VALID_INT = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
 REUSE = {'medley': '259197707078370566'}
-MUNIS = {'Kungsbacka', 'Varberg', 'Falkenberg', 'Halmstad', 'Hylte', 'Laholm', 'Karlstad', 'Hammarö', 'Forshaga', 'Kil',
-         'Kristinehamn', 'Storfors', 'Filipstad', 'Grums', 'Säffle', 'Arvika', 'Eda', 'Årjäng', 'Sunne', 'Torsby', 'Hagfors', 'Munkfors'}
+MUNIS = {'Växjö', 'Alvesta', 'Älmhult', 'Ljungby', 'Markaryd', 'Lessebo', 'Uppvidinge', 'Tingsryd',
+         'Karlskrona', 'Ronneby', 'Karlshamn', 'Sölvesborg', 'Olofström'}
 
 
 def wsrv(url, logo=False, extra=''):
@@ -31,7 +31,7 @@ def check(x):
     if len(ii) != 2 or not set(ii) <= VALID_INT: p.append(f'interests {ii}')
     if ve.get('venueInterestId') not in VALID_INT: p.append('venueInterest')
     if ve.get('municipality') not in MUNIS: p.append(f"muni {ve.get('municipality')}")
-    if not (55 < float(ve['lat']) < 61.5 and 11 < float(ve['lng']) < 15.5): p.append('coords')
+    if not (55 < float(ve['lat']) < 61.5 and 11 < float(ve['lng']) < 24.2): p.append('coords')
     rc = ev['recurrence']
     if not re.fullmatch(r'\d\d:\d\d:\d\d', rc['startTime']): p.append('startTime')
     if not (0 < rc['durationMinutes'] <= 1439): p.append('duration')

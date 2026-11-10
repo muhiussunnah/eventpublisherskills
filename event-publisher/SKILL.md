@@ -1,7 +1,7 @@
 ---
 name: event-publisher
-skill_version: "1.51.0"
-last_updated: "2026-11-05"
+skill_version: "1.52.0"
+last_updated: "2026-11-10"
 rule_count: 24
 rules_file: references/event-rules.md
 learning_log: LEARNING-LOG.md

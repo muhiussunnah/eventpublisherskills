@@ -652,3 +652,23 @@ season; hours → one window open on every listed day; never hard-delete.
    `placeId, lat, lng, address, ctaLink`.
 5. Address fixes: geocode with Nominatim (`format=json&countrycodes=se&q=<address>`, own User-Agent, 1 req/s); only
    move the pin when the match is a house number or the named POI.
+
+### Kronoberg + Blekinge run (2026-11-10) — lessons
+- **Build specs only after the last `accept`.** Two accepted places (Kronoskogsbadet, Drottningskärs kastell) were left
+  out because `choice.json` was edited after `build_specs.py` ran → rebuild, and compare the published key list with
+  every `choice` entry that has `event` and no `skip` before writing the report.
+- **Operators reuse one photo across places.** Blekingetrafiken's Karlskrona and Karlshamn archipelago pages share the
+  same image bytes → the SHA-256 guard in `__publishPlace` stopped the second publish before anything was created
+  (fails before the organizer step). Pick another official photo and re-run that one spec.
+- **Spec transfer:** compact JS-literal chunks + checksum (see `tools/permanent-places/README.md`); 63 KB compact =
+  3 chunks; expanded specs matched the Python specs byte for byte.
+- **Bot-blocked kommun sites** (almhult.se F5, karlskrona.se robot check): research agents read Wayback copies —
+  before publishing, open the live page in the user's Chrome and compare the current week (Haganäsbadet matched).
+  wsrv may need a retry for `web.archive.org/...im_/` images (Wayback answers 429 after many requests).
+- **Official site offline** (blekingemuseum.se, hosting security shutdown) → skip and list as a follow-up; third-party
+  listings + a 2024 archive are not an official current source.
+- A place's organizer is `owner` in `GET /admin/places/{id}` (`owner.organizationId`, `owner.avatar`).
+- The Sheets tab can show "You have been signed out" after a long idle; reloading the tab signed it back in (no
+  password needed). Ask the user only if the reload lands on a Google sign-in page.
+- Region check: `/admin/municipalities` items carry `region.name`; Kronoberg = Växjö, Alvesta, Älmhult, Ljungby,
+  Markaryd, Lessebo, Uppvidinge, Tingsryd; Blekinge = Karlskrona, Ronneby, Karlshamn, Sölvesborg, Olofström.
