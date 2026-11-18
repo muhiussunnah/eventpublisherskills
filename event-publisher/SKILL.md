@@ -1,7 +1,7 @@
 ---
 name: event-publisher
-skill_version: "1.52.0"
-last_updated: "2026-11-10"
+skill_version: "1.53.0"
+last_updated: "2026-11-18"
 rule_count: 24
 rules_file: references/event-rules.md
 learning_log: LEARNING-LOG.md
@@ -157,7 +157,10 @@ Used when the user gives a list of **permanent family places** (e.g. the "Vad sk
 embedded `places`, filtered by `region`) instead of a dated event calendar. Full API details:
 `references/technical-patterns.md` → "Permanent Places Publishing". Runs: Gävleborg 2026-10-13
 (`GAVLEBORG-PERMANENT-PLACES-FINAL-REPORT-2026-10-13.md`, 52 published), Södermanland 2026-10-18
-(`SODERMANLAND-PERMANENT-PLACES-FINAL-REPORT-2026-10-18.md`, 40 published), Värmland + Halland 2026-11-03 (`VARMLAND-HALLAND-PERMANENT-PLACES-FINAL-REPORT-2026-11-03.md`, 88 published). Working tools: `tools/permanent-places/`.
+(`SODERMANLAND-PERMANENT-PLACES-FINAL-REPORT-2026-10-18.md`, 40 published), Värmland + Halland 2026-11-03 (`VARMLAND-HALLAND-PERMANENT-PLACES-FINAL-REPORT-2026-11-03.md`, 88 published), Kronoberg + Blekinge 2026-11-10
+(`KRONOBERG-BLEKINGE-PERMANENT-PLACES-FINAL-REPORT-2026-11-10.md`, 53 published), Norrbotten + Västerbotten + Västernorrland + Jämtland + Gotland
+2026-11-18 (`NORRLAND-GOTLAND-PERMANENT-PLACES-FINAL-REPORT-2026-11-18.md`, 196 published) — **all 21 regions now have permanent places.**
+Working tools: `tools/permanent-places/`.
 
 0. **New HTML version?** Find what is unpublished: compare places per region/kommun in the HTML with the app's place
    counts; only the regions (and stray places) that are missing get researched.
@@ -195,6 +198,17 @@ embedded `places`, filtered by `region`) instead of a dated event calendar. Full
    113 unpublish; Aug–Sep batch only 24% correct). Fix list: `audits/permanent-places-2026-11-05.csv`.
    Fixes applied the same day: `PERMANENT-PLACES-FIXES-2026-11-05.md` (273 hidden reversibly, 638 corrected, 6 events
    moved to their own venue, 13 addresses fixed; 1484 → 1212 published live events).
+11. **Decision rules for places that do not fit a fixed weekly schedule** (5-region run 2026-11-18):
+   - hours published only week by week / as a rolling 7-day list (swim halls, ice rinks, trampoline parks) → skip and list for the user;
+   - ski hills, outdoor pools and summer places whose coming season is not on an official page (or only on Facebook) → skip,
+     re-check in season; an announced season is used exactly as published, even if it is only a few weeks long;
+   - nature places with no official word on winter access → publish for the snow-free season only (1 May–31 Oct;
+     1 Jun–30 Sep in the mountains / far north);
+   - a place that closes for known weeks (exhibition changes) → end the event before the first closed week;
+   - guided tours with drop-in at published hours are fine ("booking recommended" goes into the description); booking-only → skip;
+   - a mobile number is never used as organizer/venue phone, even when it is the only number on the official site;
+   - every photo is compared with the covers of ALL published live events (dHash ≤ 10 = duplicate) — chains and tourism
+     sites reuse photos (a "Visit Luleå" photo of Leo's Lekland was a chain photo already used for another city).
 
 ## Event Sources per City (Events_Update tab) — NEW 2026-10-21
 

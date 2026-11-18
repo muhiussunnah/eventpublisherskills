@@ -1,5 +1,5 @@
 import json, sys
-PP = 'C:/Users/User/AppData/Local/Temp/claude/F--eventpublisherskills/4ad7473a-f7bd-4184-b47a-6ef00f11c16a/scratchpad/pp/'
+PP = '<scratchpad>/pp/'  # point at the current session's scratchpad folder
 D = 'SMTWTFS'
 for g in sys.argv[1:]:
     for x in json.load(open(PP + f'res_{g}.json', encoding='utf-8')):

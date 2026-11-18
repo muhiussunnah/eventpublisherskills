@@ -1,7 +1,7 @@
 import sys, os, io, glob, hashlib, requests
 from PIL import Image, ImageOps
 
-PP = 'C:/Users/User/AppData/Local/Temp/claude/F--eventpublisherskills/4ad7473a-f7bd-4184-b47a-6ef00f11c16a/scratchpad/pp/'
+PP = '<scratchpad>/pp/'  # point at the current session's scratchpad folder
 CH = PP + 'chain/'
 os.makedirs(CH, exist_ok=True)
 UA = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36'}

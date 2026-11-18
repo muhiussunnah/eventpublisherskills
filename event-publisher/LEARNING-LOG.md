@@ -18,6 +18,38 @@ Entry template:
 
 ---
 
+## 2026-11-18 — Last five regions: Norrbotten, Västerbotten, Västernorrland, Jämtland, Gotland (user: "next 5ta region … ager all rules follow kore publish kore felo perfectly")
+**User asked:** publish the five remaining regions from `Famies - Vad ska vi hitta pa idag_3.html` with all earlier rules.
+**Result:** 354 places in the file → 22 already in the app → 332 researched (42 agents) → **196 published** (Gotland 24,
+Västernorrland 36, Jämtland 38, Västerbotten 49, Norrbotten 49), 137 skipped with reasons. Audit 196/196, no duplicate
+titles or photos, 1,248 → 1,444 published live events, Events tab refreshed. **All 21 regions are done.**
+Report: `NORRLAND-GOTLAND-PERMANENT-PLACES-FINAL-REPORT-2026-11-18.md`.
+**New rules / preferences from the user:** none new — "all earlier rules, perfectly". My own decisions inside those
+rules (listed in the report so the user can overrule them):
+- hours only week by week / rolling list → skip (9 places, listed as follow-up);
+- season not announced on an official page → skip (most small ski hills in November); announced seasons used as published;
+- nature places without an official winter statement → snow-free season only;
+- closed installation weeks → event ends before the first closed week;
+- mobile number never used as contact, even if it is the only number.
+**What I learned (technical):**
+- Spec files, images and helper files go into the page through a file input + `file_upload` — no tokens, no clipboard.
+- dHash duplicate check against ALL published live covers with one identical image pipeline on both sides; 7 chain or
+  shared photos caught before publishing (the publisher's SHA-256 guard only catches byte-identical files).
+- Images the proxy cannot fetch → local crop + `blob:` URLs; no change to the publisher needed.
+- Reused organizers without a logo show up as `noLogo` in the audit → PATCH the organizer.
+- Everything is in `references/technical-patterns.md` → "Last five regions run (2026-11-18)"; tools in
+  `tools/permanent-places/` (`page_tools.js`, `review.py`, `setc.py`, `cs.py`, `localimg.py`, `outcome.py`, `mkreport.py`, `groups.py`).
+**Mistakes + fixes:**
+- A localhost HTTP server for the spec transfer left the dashboard `fetch` hanging (Chrome Local Network Access) → stopped, switched to `file_upload`.
+- First duplicate check compared browser-resized with proxy-resized images → identical photos looked different (8–16) → one pipeline for both.
+- A research agent returned two rows with the same item number (two ski areas of one resort) → second row renumbered (`i + 1000`) so keys stay unique.
+- An awaited loop longer than 45 s killed a `javascript_tool` call (the page kept working) → poll in short calls.
+- I read a `flagged` row wrongly at first (the last column is the nearest key inside the batches, not the duplicate's key); the swap was still right because the event distance was 3.
+**Files updated:** SKILL.md (v1.53.0, runs list, rule 11), references/technical-patterns.md, tools/permanent-places/* (new page_tools.js and Python helpers, brief, README), this log, the final report.
+**Open follow-ups:** see the report — 65 copied seasons to confirm in 2027, 9 events ending before April 2027, the
+week-by-week and no-photo places, ski hills to re-check in mid-December, Region Gotland organizer without e-mail,
+kommun spelling in the app (developer), and the user's still-open "hours off" question.
+
 ## 2026-11-10 (part 2) — Weekly report region/city-wise + sheet cleanup (user: "expired dorkar nai rakhar file e")
 **User asked:** region-by-region and city-by-city update (events live, Ticketmaster, sponsored videos, articles), update
 the sheet and remove everything expired from it, and say how many regions are done / left.

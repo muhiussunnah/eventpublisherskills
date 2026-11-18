@@ -1,4 +1,4 @@
-# Research brief — permanent family places (Kronoberg + Blekinge) for the Famies app
+# Research brief — permanent family places (Norrbotten, Västerbotten, Västernorrland, Jämtland, Gotland) for the Famies app
 
 Famies is a Swedish family app (parents with kids 0–12). Each **permanent family place** (museum, swim hall, park,
 farm, lekland, ski hill …) is published as **organizer → venue → one recurring event**. You do the research only;
@@ -8,7 +8,7 @@ Input: `group_<G>.json` = list of places from a client file: `{i, id, name, muni
 ageMax, description, contact{address,phone,website}, coordinates{lat,lng}, source, priceLevel, tags}`.
 The client file is only a hint: its names, coordinates, domains and details are often outdated or wrong.
 
-Today is **2026-11-10**.
+Today is **2026-11-18**. It is winter: most summer places are closed for the season now, ski places are about to open.
 
 ## For every place, find out (official website first, then the kommun / visit-site, then official socials)
 1. **Status** — open to the public? Permanently closed, renamed, merged, under renovation, private only? Is it
@@ -20,13 +20,16 @@ Today is **2026-11-10**.
    - website, Instagram, Facebook, YouTube (official accounts only);
    - logo: a direct URL to the official logo image (png/jpg/svg/webp, the biggest you can find), or null.
    Naming rules:
-   - kommun-run → `"<official kommun name>"` exactly as the kommun writes it (e.g. "Växjö kommun",
-     "Ljungby kommun", "Älmhults kommun", "Lessebo kommun", "Karlskrona kommun", "Karlshamns kommun", "Ronneby kommun",
-     "Sölvesborgs kommun", "Olofströms kommun" …), the kommun's
-     main email + switchboard;
-   - chains → one organizer per location: "Leos Lekland Växjö", "O'Learys Växjö" — with that location's own phone/email/website (never the chain's shared email);
+   - kommun-run → `"<official kommun name>"` exactly as the kommun writes it (e.g. "Luleå kommun", "Umeå kommun",
+     "Skellefteå kommun", "Sundsvalls kommun", "Östersunds kommun", "Kiruna kommun", "Härjedalens kommun" …;
+     on Gotland the kommun is called **"Region Gotland"**), with the kommun's main email + switchboard.
+     Use exactly the same organizer name, email and phone for every place of the same kommun;
+   - chains → one organizer per location: "Leos Lekland Umeå", "O'Learys Luleå", "JumpYard Sundsvall", "Boda Borg Skellefteå" — with that location's own phone/email/website (never the chain's shared email);
    - swim halls run by Medley → organizer "Medley" (it exists already; just say `reuse: "Medley"`);
-   - Länsstyrelsen naturum → "Länsstyrelsen Kronoberg" / "Länsstyrelsen Blekinge" (gov);
+   - naturum / nature reserves run by a länsstyrelse → the länsstyrelse's name as it writes it, e.g.
+     "Länsstyrelsen Norrbotten", "Länsstyrelsen Västerbotten", "Länsstyrelsen Västernorrland",
+     "Länsstyrelsen Jämtlands län", "Länsstyrelsen i Gotlands län" (gov), same name + contact for all its places;
+   - ski resorts run by SkiStar → one organizer per destination ("SkiStar Åre", "SkiStar Vemdalen");
    - museums owned by a region/foundation → the museum's own name or the foundation's legal name
      ("Stiftelsen …", "Föreningen …", "… hembygdsförening").
 3. **Venue** — official title, street address with postcode and town, exact coordinates (official / OpenStreetMap),
@@ -45,11 +48,19 @@ Today is **2026-11-10**.
      * ONE time window that is genuinely open on **every** listed day (if weekends close earlier, use the shorter
        window); the venue keeps the full per-day hours;
      * always-open outdoor place → days [0,1,2,3,4,5,6], "00:00:00", 1439 minutes;
-     * open year-round → startDate "2026-11-10", endDate "2027-12-31";
-     * in season right now → startDate "2026-11-10", endDate = official season end;
+     * open year-round → startDate "2026-11-18", endDate "2027-12-31";
+     * in season right now → startDate "2026-11-18", endDate = official season end;
+     * hours published only for a limited period (e.g. "höstens öppettider t.o.m. 20 december") → endDate = that date;
+     * if the window shared by ALL open days is shorter than ~3 hours, list only the days that share a real window
+       (e.g. Mon–Fri 14–18) instead of a useless 60-minute window;
      * season over: next season officially announced → those dates; not announced → copy the 2026 season span into
        2027 and flag `seasonCopied: true`;
-     * winter places (ski) → the 2026/27 season dates (announced, or copied from last season and flagged);
+     * winter places (ski, ice rinks, sled hills with lifts) → the 2026/27 season with the official lift/opening
+       hours per weekday. Season dates announced → use them; only last season's dates on the official site → copy
+       them to 2026/27 and flag `seasonCopied`. A hill that only says "öppet när det finns snö / se Facebook" with no
+       weekday hours on any official page → skip ("no published hours");
+     * boats with a public timetable and tickets on board are fine (window = first departure → last return);
+       boat trips that must be booked → skip;
    - `interestIds`: exactly 2 from: 9 Bebis & Du, 7 Familjeliv & Pepp, 1 Fira & Njuta, 11 Lär & Utforska,
      8 Lek & Fart, 2 Mat & Mums, 4 Mys & Hitta på, 6 Ses & Hitta på, 5 Tillgängligt för alla, 10 Utflykter & Kul,
      3 Ut & Upptäck. Conventions: museums [10,11], swim/action/ski [8,10], nature/parks/viewpoints [3,10],
@@ -88,7 +99,7 @@ Maps, TripAdvisor, Airbnb, blogs or the client file. Add to every place:
 - **Address:** the real visiting address and coordinates of THIS place (not the kommun office, not another branch).
 
 ## Output — write as you go
-File: `C:\Users\User\AppData\Local\Temp\claude\793086065a500b32\4ad7473a-f7bd-4184-b47a-6ef00f11c16a\scratchpad\pp2\res_<G>.json`
+File: `<scratchpad>\pp3\res_<G>.json`
 Re-write the whole file with Python `json.dump(data, f, ensure_ascii=False, indent=1)` after **each** place. A list of:
 ```
 {"i": 12, "name": "<client name>", "skip": null | "reason",
@@ -100,8 +111,23 @@ Re-write the whole file with Python `json.dump(data, f, ensure_ascii=False, inde
            "interestIds": [a, b], "ctaLink", "ctaText": "Läs mer"},
  "images": ["https://…", "…"],
  "sources": ["https://…"], "flags": ["seasonCopied", "hours unclear", …], "note": "short free text",
- "verified": "2026-11-10"}
+ "verified": "2026-11-18"}
 ```
+Coordinates must be inside Sweden (lat 55–69.1, lng 11–24.2) and at the place itself. `venue.municipality` must be the
+kommun name exactly as in the input (Gotland → "Gotland").
+
+Working rules:
+- At most **12 WebSearch calls** in total; use WebFetch / curl on the official sites for everything else.
+- Keep your own scratch files in `<scratchpad>\pp3\w<G>\` (create it); write nothing else outside it except `res_<G>.json`.
+- Places that are booked by nature (husky/sled-dog tours, rafting, riding tours, guided mine or cave tours, via
+  ferrata, theatres, opera) need only a quick look at the official page: if there is no drop-in visit with published
+  hours → skip with a one-line reason, don't spend more time on them.
+- If the official site blocks scripts and you had to read a web.archive.org copy, add the flag `"wayback"` and the
+  live URL in `note`, so the publisher can check the live page. If the official site is offline and no other official
+  page (kommun, länsstyrelse, region) confirms current hours → skip.
+- Two input items that are the same place → research once, skip the other with "duplicate of #<i>".
+- Never state hours, dates or prices in `description` (they change); do say when something must be booked.
+
 Use WebSearch / WebFetch / curl / Python only. Do not use any browser tools and do not touch the Famies dashboard,
 the API or the Google Sheet. Never put a private person's name, email or mobile number in any field.
 

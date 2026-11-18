@@ -673,6 +673,36 @@ season; hours → one window open on every listed day; never hard-delete.
 - Region check: `/admin/municipalities` items carry `region.name`; Kronoberg = Växjö, Alvesta, Älmhult, Ljungby,
   Markaryd, Lessebo, Uppvidinge, Tingsryd; Blekinge = Karlskrona, Ronneby, Karlshamn, Sölvesborg, Olofström.
 
+### Last five regions run (2026-11-18, 354 places → 196 published) — lessons
+- **Scale:** 42 research agents (one per ~8 places, brief `tools/permanent-places/brief_pp.md`), rolling review →
+  10 publish batches. Review loop per group: `imgprep.py` → `review.py` → look at the contact sheet → `setc.py` →
+  `build_specs.py` → `cs.py` → upload → `__prep` → `__chainAfter`. Publishing runs ~12 s per place in the page queue.
+- **Spec transfer without tokens or clipboard:** a file `<input id="__specfile" multiple>` created in the dashboard
+  page + the browser `file_upload` tool; verify with length + checksum (`cs.py` / `__cs`). Images and any other file
+  travel the same way. Replaces the JS-literal chunks.
+- **Duplicate-photo check against everything live** (`page_tools.js`): hash the cover of every published live event
+  once (`__buildRef`, 1,248 images ≈ 4 min) and every candidate with the SAME pipeline (wsrv 96×96 cover PNG →
+  `createImageBitmap` 9×8 → 64-bit dHash). Distance ≤ 10 = duplicate (real duplicates measured 0–3; unrelated photos
+  17+). Hashing one side from a browser resize and the other from a proxy resize gives 8–16 for identical pictures.
+  `__prep` returns `flagged` rows `[key, distEvent, distVenue, distInBatches, keyInBatches]` and in-batch `pairs`.
+- **Images the proxy cannot fetch** (wsrv 404 "hostname unresolvable", 400 for some wp.com hosts): `localimg.py`
+  downloads the originals with a browser UA and crops locally; upload the jpgs and turn them into `blob:` URLs with
+  `URL.createObjectURL(file)` (`__localSpecs`) — the publisher's `getBlob()` fetches a blob URL like any other URL.
+- **Organizer pitfalls:** e-mail is unique in the DB (`org 400 … 23505`) → create the organizer without e-mail and
+  note it. A reused organizer may have no logo (first place of that kommun had none) → the audit reports `noLogo`;
+  fix with upload + `PATCH /admin/organizations/{id}` (full body). White logos (`…_vit`, `neg`, white SVG) render
+  blank on white → `logoDark` (bg `1d3557`). Python `requests` to wsrv needs a browser User-Agent (403 otherwise).
+- **Token:** the JWT lasts ~2 h and a reload wipes the page state; published IDs are kept in `localStorage`
+  (`__saveIds`). Long evaluations must stay under 45 s per `javascript_tool` call (CDP timeout) → start the work as a
+  background promise that writes to `window.__x`, then poll with short waits.
+- **Getting code or URLs out of the page:** `javascript_tool` output is cut at ~1,000 characters and blocked when it
+  looks like query strings; put the text in an `<article><pre>` and read it with `get_page_text`. After retyping IDs
+  into a local file, compare `cs` of the file with `cs` of the same string in the page.
+- **Kommun names:** the app spells three kommuner wrong ("Robertfors", "Vaggaryd", "Lilla edet"); alias them in the
+  page (`__muni['Robertsfors'] = __muni['Robertfors']`) and expect a false `kommun` difference in the audit.
+- **Sheet refresh:** 1,444 rows pasted in one go (clear `A2:E`, paste at `A2`, restore the clipboard) and verified by
+  a checksum of the gviz CSV rows against the dashboard list; G23 = I292 = city sum = API count.
+
 ### Weekly report + sheet cleanup (learned 2026-11-10)
 - Since 2026-11-10 the sheet keeps **only live data**: delete ended Ticketmaster rows (Name Box `A<r1>:G<r2>` →
   right-click → "Delete rows"), bottom block first; in the Sponsored tab clear `A3:D87` and keep the active posts at

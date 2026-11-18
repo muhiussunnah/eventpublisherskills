@@ -14,6 +14,7 @@
     } catch (e) { return { s: 0, err: String(e) }; } finally { clearTimeout(t); }
   }
   async function getBlob(url, ms = 60000) {
+    if (window.__localBlobs && window.__localBlobs[url]) return window.__localBlobs[url];
     const c = new AbortController(); const t = setTimeout(() => c.abort(), ms);
     try { const r = await fetch(url, { cache: 'no-store', signal: c.signal }); if (!r.ok) throw new Error('img ' + r.status); return await r.blob(); }
     finally { clearTimeout(t); }

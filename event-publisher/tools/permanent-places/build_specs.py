@@ -1,11 +1,10 @@
 import json, sys, os, re, urllib.parse
 
 PP = '<scratchpad>/pp/'  # point at the current session's scratchpad folder
-TODAY = '2026-11-10'
+TODAY = '2026-11-18'
 VALID_INT = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
 REUSE = {'medley': '259197707078370566'}
-MUNIS = {'Växjö', 'Alvesta', 'Älmhult', 'Ljungby', 'Markaryd', 'Lessebo', 'Uppvidinge', 'Tingsryd',
-         'Karlskrona', 'Ronneby', 'Karlshamn', 'Sölvesborg', 'Olofström'}
+MUNIS = {'Sorsele', 'Lycksele', 'Luleå', 'Östersund', 'Norsjö', 'Krokom', 'Piteå', 'Nordmaling', 'Kalix', 'Kiruna', 'Gällivare', 'Örnsköldsvik', 'Pajala', 'Överkalix', 'Åre', 'Berg', 'Timrå', 'Bjurholm', 'Arvidsjaur', 'Boden', 'Sollefteå', 'Ånge', 'Gotland', 'Robertsfors', 'Ragunda', 'Vilhelmina', 'Vindeln', 'Arjeplog', 'Dorotea', 'Malå', 'Storuman', 'Vännäs', 'Jokkmokk', 'Strömsund', 'Haparanda', 'Sundsvall', 'Åsele', 'Kramfors', 'Skellefteå', 'Härnösand', 'Bräcke', 'Härjedalen', 'Övertorneå', 'Umeå', 'Älvsbyn'}
 
 
 def wsrv(url, logo=False, extra=''):
@@ -31,7 +30,7 @@ def check(x):
     if len(ii) != 2 or not set(ii) <= VALID_INT: p.append(f'interests {ii}')
     if ve.get('venueInterestId') not in VALID_INT: p.append('venueInterest')
     if ve.get('municipality') not in MUNIS: p.append(f"muni {ve.get('municipality')}")
-    if not (55 < float(ve['lat']) < 61.5 and 11 < float(ve['lng']) < 24.2): p.append('coords')
+    if not (55 < float(ve['lat']) < 69.1 and 11 < float(ve['lng']) < 24.2): p.append('coords')
     rc = ev['recurrence']
     if not re.fullmatch(r'\d\d:\d\d:\d\d', rc['startTime']): p.append('startTime')
     if not (0 < rc['durationMinutes'] <= 1439): p.append('duration')
@@ -67,6 +66,9 @@ def main():
             if x.get('skip') or c.get('skip'):
                 report.append(f"#{i} {x['name']}: SKIP {c.get('skip') or x.get('skip')}")
                 continue
+            if c.get('hold'):
+                report.append(f"#{i} {x['name']}: HOLD {c['hold']}")
+                continue
             probs = check(x)
             report.append(f"#{i} {x['event']['title'][:70]} | {', '.join(probs) or 'ok'}")
             if probs and not c.get('accept'):
@@ -91,6 +93,7 @@ def main():
                 'img': {'event': wsrv(imgs[c['event']], extra=c.get('crop', '')),
                         'venue': wsrv(imgs[c.get('venue', c['event'])], extra=c.get('vcrop', c.get('crop', '')))},
             }
+            if c.get('logoDark') and spec['org']['logoUrl']: spec['org']['logoUrl'] = spec['org']['logoUrl'].replace('cbg=white&bg=white', 'cbg=1d3557&bg=1d3557')
             if c.get('title'): spec['event']['title'] = c['title']
             if c.get('cta'): spec['event']['ctaLink'] = c['cta']; spec['venue']['ctaLink'] = c['cta']
             for k, v in (c.get('rec') or {}).items(): spec['event']['recurrence'][k] = v
