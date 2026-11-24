@@ -610,6 +610,28 @@ What the 2026-10-21 run found (reuse next time):
 ## Sponsored posts API
 `GET /admin/sponsored?page=1&limit=100&isEnd=false|true` → `data.sponsored[]` {sponsoredId, title, image, startDate, endDate, owner, municipality}, `data.totalSponsored`. `isEnd=false` = active (same split the dashboard shows). Detail: `GET /admin/sponsored/{id}`; create/edit/delete: POST / PATCH / DELETE `/admin/sponsored[/{id}]` (image upload prefix `sponsored.jpg-<ts>`).
 
+### Creating a sponsored post (learned 2026-11-24, Ticketmaster "Melodifestivalen")
+The dashboard form (`/sponsored/create`) sends exactly this to `POST /admin/sponsored` (read from the bundle's submit
+handler), so the API call is equivalent to filling the form:
+```js
+{ organizationId, title, description /* HTML: "<p>…</p>" */, video: null | "<drive link>", image /* url from /admin/image */,
+  lat, lng, address, municipalityId,
+  startDate: new Date('YYYY-MM-DD').toISOString(), endDate: new Date('YYYY-MM-DD').toISOString(),
+  ctaLink, ctaText,                       // ctaLink is required when ctaText is given
+  targetFilters: { kidAge: {min, max}, parentAge: {min, max}, parentGender: [], location: [] } }
+```
+- Image: `POST /admin/image` (multipart field `file`, file name `sponsored.<ext>-<Date.now()>`) → `data.image`.
+- Response is only `{success:true}` → find the new `sponsoredId` in `GET /admin/sponsored?isEnd=false` by title, then
+  re-read `GET /admin/sponsored/{id}` and compare every field.
+- Ticketmaster posts (organizer `Ticketmaster`, found with `GET /admin/organizations?searchText=Ticketmaster`) all use
+  address "Vasagatan 22, 111 20 Stockholm, Sweden" (59.33115830000001, 18.0597756), municipality Stockholm, kids 0–18,
+  parents 18–100, no gender/location filter (= all users), ctaLink = the artist page
+  `https://www.ticketmaster.se/artist/<name>-biljetter/<id>` (find it with ticketmaster.se search in the user's Chrome
+  and open it to confirm it lists the right events).
+- Links for the user: view `https://dashboard.fammap.app/sponsored/<id>`, edit `https://dashboard.fammap.app/sponsored/edit/<id>`.
+- A picture the boss sent on WhatsApp is usually saved by the user in `Downloads` (newest image file) — copy it to
+  an empty scratchpad folder, look at it, and put it into the page with the file-input + `file_upload` method.
+
 ## Accuracy audit of all live permanent places (learned 2026-11-05)
 Tools: `tools/permanent-places/audit/` (set the `AUD` path at the top of each script to the current scratchpad).
 1. **Pull**: in the dashboard tab, page `GET /admin/events?isEnd=false&limit=100&page=N` (limit > 100 → 400 code
