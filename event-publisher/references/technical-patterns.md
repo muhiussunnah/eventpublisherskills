@@ -632,6 +632,43 @@ handler), so the API call is equivalent to filling the form:
 - A picture the boss sent on WhatsApp is usually saved by the user in `Downloads` (newest image file) — copy it to
   an empty scratchpad folder, look at it, and put it into the page with the file-input + `file_upload` method.
 
+## Checking published content in the Famies Android app (learned 2026-11-26)
+Tools: `tools/app-check/` (`emu.py`, `collect.py`, `expect.py`). The app runs in an Android emulator on the user's PC.
+- **Setup once:** Android command-line tools + JDK 17 under `%LOCALAPPDATA%/Android`; `sdkmanager` must be run from a
+  `.cmd` file with `call` and `yes |` piped in (the license answer does not arrive otherwise); image
+  `system-images;android-35;google_apis_playstore;x86_64`, AVD `famies` (Pixel 6, Play Store on, 4 GB RAM, GPU host).
+- **Getting the app:** the public Play listing is Sweden-only ("This item isn't available in your country"). The
+  company adds the user's Gmail to the **Internal testing** track (not country restricted) → it installs as
+  "Famies (Internal Beta)", package `com.famapdirectory.apps`. Google sign-in and the app login are done by the user.
+- **Black window** = the phone screen is asleep → `adb shell input keyevent KEYCODE_WAKEUP`, `wm dismiss-keyguard`.
+- **Location:** `adb emu geo fix` did not move the fused location. Working: `appops set com.android.shell
+  android:mock_location allow`, then for `gps`, `network`, `fused`: `cmd location providers add-test-provider P`,
+  `set-test-provider-enabled P true`, `set-test-provider-location P --location LAT,LNG --accuracy 10`; restart the app.
+- **Reading the UI:** `uiautomator dump` gives every card as one node (`content-desc` = title, organizer, date label,
+  age, distance joined by line breaks). `collect.py NAME MAXSWIPES` scrolls and stores all cards; ~4 cards per swipe,
+  so give enough swipes (275 cards needed 70) and do not compare lists that hit the swipe limit.
+- **App structure (3.1.7):** Events tab → `Region` (county → areas, several counties add up) + chips Free / Today /
+  Tomorrow / Weekend / Select date (range picker: tap the same day twice for one day). Hitta på tab = a separate
+  suggestion feed with its own filter (distance, age, days ahead). Settings has no theme option; the build is dark only.
+- **Ground truth:** `expect.py <Region> <YYYY-MM-DD>` lists the places from the 2026-11-18 report that should be open
+  that day (period + weekdays) → compare with the collected cards.
+- **Findings 2026-11-26:** weekday and date filter are exact for places already in season; recurring places whose
+  `recurrence.startDate` is in the future are not shown at all (unfiltered or with a date inside the season); cards
+  always say "Today". Report: `APP-DATE-FILTER-CHECK-REPORT-2026-11-26.md`.
+
+### Events tab of the sheet: city table grouped by region (user request 2026-11-26)
+- Layout now: A–E event rows · F:G region + amount (Total in row 23) · **H:J city, amount, region**: 21 groups in the
+  same order as F, each group = main city first in **bold** with the region name in J, then the other kommuner A–Ö;
+  all 290 kommuner stay listed (0 allowed); `Total` in H292/I292.
+- Main city = largest city of the region: Karlskrona, Falun, Gotland, Gävle, Halmstad, Östersund, Jönköping, Kalmar,
+  Växjö, Luleå, Malmö, Stockholm, Eskilstuna, Uppsala, Karlstad, Umeå, Sundsvall, Västerås, Göteborg, Örebro, Linköping.
+- One paste of A2:J (clear `A2:J` first) with the formulas in G and I; `ctrl+shift+v` keeps the bold rows only while
+  the row positions stay the same (bold rows 2, 7, 22, 23, 33, 39, 47, 60, 72, 80, 94, 127, 153, 162, 170, 186, 201,
+  208, 218, 267, 279). Verify with three checksums of the gviz CSV: event rows, `F|G`, `H|I|J`.
+- Expired Date (D) of a one-time event = the last `endDate` (else `startDate`) in `GET /admin/events/{id}` → `dates[]`;
+  the list endpoint's `lastDate` is the last date that has already passed, not the end.
+- `/admin/municipalities` is paged: `?limit=100&page=1..3` for all 290.
+
 ## Accuracy audit of all live permanent places (learned 2026-11-05)
 Tools: `tools/permanent-places/audit/` (set the `AUD` path at the top of each script to the current scratchpad).
 1. **Pull**: in the dashboard tab, page `GET /admin/events?isEnd=false&limit=100&page=N` (limit > 100 → 400 code

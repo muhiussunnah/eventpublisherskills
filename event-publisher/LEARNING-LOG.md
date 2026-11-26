@@ -18,6 +18,31 @@ Entry template:
 
 ---
 
+## 2026-11-26 — Famies app on an Android emulator, CEO's date-filter check, Events tab city table by region
+**User asked:** (1) install the Famies app so I can see how published content looks; (2) the CEO: "check if the boys'
+date filter works in app, where you publish all the permanent places"; (3) update the sheet's Events tab: live amount
+per region and, to the right, per city grouped under each region with the main city first in bold; (4) write the app
+problems up for the developers.
+**Result:** emulator `famies` (Android 15 + Play) set up; app installed through the Internal testing track (3.1.7).
+Date/region filter tested against our own publish data: exact for places in season (Gotland 8/8 today, 6/6 on a
+Monday; Jämtland 12/12), but places whose period starts in the future never show (Jämtland 19 Dec: 11 of 23, Gotland
+7 Jul 2027: 6 of 21). Sheet Events tab re-pasted: 1,434 published live events, G23 = I292 = 1,434, city table grouped
+by region with 21 bold main-city rows and a new column J (region). Report + developer message:
+`APP-DATE-FILTER-CHECK-REPORT-2026-11-26.md`.
+**New rules / preferences from the user:**
+- City amounts are shown per region: main city first and bold, then the other cities of that region.
+- App problems are written as a message the user can forward to the developers (steps, expected, actual, example IDs).
+- The user does the Google/Play sign-in and the app login himself; I only drive the app afterwards.
+**What I learned (technical):** emulator setup, Sweden-only Play listing → Internal testing, mock location through
+test providers, reading the app with `uiautomator dump`, sheet layout and the true "Expired Date" source →
+`references/technical-patterns.md` → "Checking published content in the Famies Android app".
+**Mistakes + fixes:** `adb emu geo fix` left the phone in California (Hitta på said "nothing nearby") → test location
+providers. First list comparisons (Today vs Tomorrow in Stockholm) were cut off by my swipe limit → only compare
+complete lists; use small regions for exact counts. Dashboard token had expired → the user logged in again.
+**Files updated:** tools/app-check/ (new), references/technical-patterns.md, SKILL.md (v1.55.0), this log, the report.
+**Open follow-ups:** developers to fix future-start recurring events + the "Today" label; re-test after the fix.
+Main city for Södermanland/Västernorrland is the largest city (Eskilstuna, Sundsvall), not the residence city.
+
 ## 2026-11-24 — Sponsored post for Ticketmaster: "Melodifestivalen" (boss on WhatsApp: "upload this as a sponsored post from Ticketmaster … from today to Jan 31 … link to the correct Ticketmaster page")
 **User asked:** publish what the boss asked for and give the edit link so he can check it.
 **Result:** sponsored post "Melodifestivalen" (id 501878463569888614), organizer Ticketmaster, the boss's poster as image,
